@@ -3,7 +3,7 @@
   "description": "An example using GraphQL-Voyager",
   "type": "module",
   "scripts": {
-    "start": "ts-node index.ts",
+    "start": "node index.ts",
     "test": "tsc"
   },
   "dependencies": {
@@ -14,7 +14,6 @@
   },
   "devDependencies": {
     "@types/express": "4.17.21",
-    "ts-node": "10.9.2",
     "typescript": "5.9.2"
   }
 }
