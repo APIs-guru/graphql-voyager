@@ -1,6 +1,6 @@
-import { git, readPackageJSON } from './utils.ts';
+import packageJSON from '../package.json' with { type: 'json' };
+import { git } from './utils.ts';
 
-const packageJSON = readPackageJSON();
 const labelsConfig: { [label: string]: { section: string; fold?: boolean } } = {
   'PR: breaking change 💥': {
     section: 'Breaking Change 💥',

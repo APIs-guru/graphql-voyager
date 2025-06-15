@@ -1,11 +1,4 @@
-import * as childProcess from 'node:child_process';
-import * as fs from 'node:fs';
-import * as path from 'node:path';
-
-export function localRepoPath(...paths: ReadonlyArray<string>): string {
-  const repoDir = path.resolve(import.meta.dirname, '..');
-  return path.join(repoDir, ...paths);
-}
+import childProcess from 'node:child_process';
 
 interface GITOptions extends SpawnOptions {
   quiet?: boolean;
@@ -73,25 +66,4 @@ function spawn(
   if (result.status !== 0) {
     throw new Error(`Command failed: ${command} ${args.join(' ')}`);
   }
-}
-
-interface PackageJSON {
-  description: string;
-  version: string;
-  private?: boolean;
-  repository?: { url?: string };
-  scripts?: { [name: string]: string };
-  type?: string;
-  exports: { [path: string]: string };
-  types?: string;
-  typesVersions: { [ranges: string]: { [path: string]: Array<string> } };
-  devDependencies?: { [name: string]: string };
-  publishConfig: { tag: string };
-}
-
-export function readPackageJSON(
-  dirPath: string = localRepoPath(),
-): PackageJSON {
-  const filepath = path.join(dirPath, 'package.json');
-  return JSON.parse(fs.readFileSync(filepath, 'utf-8'));
 }
