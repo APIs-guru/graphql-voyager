@@ -67,6 +67,12 @@ jobs:
         with:
           args: -color
 
+      - name: Lint Dockerfiles
+        uses: docker://hadolint/hadolint:latest-alpine
+        with:
+          entrypoint: /bin/sh
+          args: -c "find . -type f -name 'Dockerfile*' -exec hadolint {} +"
+
   checkForCommonlyIgnoredFiles:
     name: Check for commonly ignored files
     runs-on: ubuntu-latest
