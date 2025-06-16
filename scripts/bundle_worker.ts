@@ -1,9 +1,9 @@
-import * as assert from 'node:assert';
-import * as crypto from 'node:crypto';
-import * as fs from 'node:fs';
-import * as path from 'node:path';
+import assert from 'node:assert';
+import crypto from 'node:crypto';
+import fs from 'node:fs';
+import path from 'node:path';
 
-import { spawnOutput } from './utils';
+import { spawnOutput } from './utils.ts';
 
 // Clean up existing worker-dist directory
 const outputDir = 'worker-dist';
