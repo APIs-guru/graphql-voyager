@@ -41,7 +41,7 @@
     "serve": "ts-node ./scripts/serve-directory.ts -p 9090 demo-dist/graphql-voyager",
     "bundle": "rm -rf dist && webpack --mode=production",
     "build:ts": "tsc --project tsconfig.build.json",
-    "build:worker": "rm -rf worker-dist && docker compose up --abort-on-container-exit --build build-worker",
+    "build:worker": "ts-node scripts/bundle_worker.ts",
     "build:release": "npm run build:worker && npm run bundle && npm run build:ts",
     "build:demo": "npm run build:release && rm -rf demo-dist && mkdir demo-dist && cp -R demo/ demo-dist/graphql-voyager/ && cp dist/voyager.css* dist/voyager.standalone.js* demo-dist/graphql-voyager/",
     "stats": "NODE_ENV=production webpack --json --mode=production > stats.json",

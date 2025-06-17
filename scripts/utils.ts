@@ -42,7 +42,7 @@ interface SpawnOptions {
   env?: typeof process.env;
 }
 
-function spawnOutput(
+export function spawnOutput(
   command: string,
   args: ReadonlyArray<string>,
   options?: SpawnOptions,
