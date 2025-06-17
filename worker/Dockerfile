@@ -78,4 +78,4 @@ RUN	emcc \
     --post-js worker/post.js \
     worker/viz.cpp ;
 
-CMD node worker/bundle.js < emscripten_worker.js > worker-dist/voyager.worker.js
+CMD ["cat", "emscripten_worker.js"]
