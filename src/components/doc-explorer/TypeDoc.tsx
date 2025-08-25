@@ -3,20 +3,20 @@ import './TypeDoc.css';
 import { GraphQLField, GraphQLNamedType } from 'graphql/type';
 import React, { Component, ReactElement } from 'react';
 
-import { TypeGraph } from '../../graph/type-graph';
+import { TypeGraph } from '../../graph/type-graph.ts';
 import {
   mapDerivedTypes,
   mapFields,
   mapInterfaces,
   mapPossibleTypes,
-} from '../../introspection/utils';
-import { highlightTerm } from '../../utils/highlight';
-import { isMatch } from '../../utils/is-match';
-import Markdown from '../utils/Markdown';
-import Argument from './Argument';
-import Description from './Description';
-import TypeLink from './TypeLink';
-import WrappedTypeName from './WrappedTypeName';
+} from '../../introspection/utils.ts';
+import { highlightTerm } from '../../utils/highlight.tsx';
+import { isMatch } from '../../utils/is-match.ts';
+import Markdown from '../utils/Markdown.tsx';
+import Argument from './Argument.tsx';
+import Description from './Description.tsx';
+import TypeLink from './TypeLink.tsx';
+import WrappedTypeName from './WrappedTypeName.tsx';
 
 interface TypeDocProps {
   selectedType: GraphQLNamedType;

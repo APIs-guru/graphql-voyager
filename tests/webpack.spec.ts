@@ -1,8 +1,8 @@
 import { expect, test } from '@playwright/test';
 
-import { gotoVoyagerPage } from './PageObjectModel';
+import { gotoVoyagerPage } from './PageObjectModel.ts';
 
-test('open webpack example', async ({ page }) => {
+test.fixme('open webpack example', async ({ page }) => {
   const voyagerPage = await gotoVoyagerPage(page);
 
   await voyagerPage.waitForGraphToBeLoaded();

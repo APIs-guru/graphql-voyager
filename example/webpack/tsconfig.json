@@ -2,8 +2,8 @@
   "compilerOptions": {
     "strict": true,
     "noEmit": true,
-    "module": "esnext",
-    "moduleResolution": "node",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
     "target": "es2021",
     "jsx": "react-jsx"
   },

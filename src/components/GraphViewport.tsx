@@ -3,13 +3,13 @@ import IconButton from '@mui/material/IconButton';
 import Stack from '@mui/material/Stack';
 import { Component, createRef } from 'react';
 
-import { renderSvg } from '../graph/svg-renderer';
-import { TypeGraph } from '../graph/type-graph';
-import { Viewport } from '../graph/viewport';
+import { renderSvg } from '../graph/svg-renderer.ts';
+import { TypeGraph } from '../graph/type-graph.ts';
+import { Viewport } from '../graph/viewport.ts';
 import ZoomInIcon from './icons/zoom-in.svg';
 import ZoomOutIcon from './icons/zoom-out.svg';
 import ZoomResetIcon from './icons/zoom-reset.svg';
-import LoadingAnimation from './utils/LoadingAnimation';
+import LoadingAnimation from './utils/LoadingAnimation.tsx';
 
 interface GraphViewportProps {
   typeGraph: TypeGraph | null;

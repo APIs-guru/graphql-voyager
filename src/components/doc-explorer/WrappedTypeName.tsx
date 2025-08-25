@@ -10,9 +10,9 @@ import {
   GraphQLNamedType,
 } from 'graphql/type';
 
-import { stringifyTypeWrappers } from '../../utils/stringify-type-wrappers';
+import { stringifyTypeWrappers } from '../../utils/stringify-type-wrappers.ts';
 import RelayIcon from '../icons/relay-icon.svg';
-import TypeLink from './TypeLink';
+import TypeLink from './TypeLink.tsx';
 
 interface WrappedTypeNameProps {
   container: GraphQLField<any, any> | GraphQLArgument | GraphQLInputField;

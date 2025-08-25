@@ -5,7 +5,7 @@ import {
   isNonNullType,
 } from 'graphql/type';
 
-import { unreachable } from './unreachable';
+import { unreachable } from './unreachable.ts';
 
 export function stringifyTypeWrappers(type: GraphQLType): [string, string] {
   if (isNamedType(type)) {

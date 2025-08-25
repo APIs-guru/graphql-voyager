@@ -1,9 +1,9 @@
 import { GraphQLNamedType } from 'graphql/type';
 
-import { TypeGraph } from '../../graph/type-graph';
-import { mapFields } from '../../introspection/utils';
-import { highlightTerm } from '../../utils/highlight';
-import { isMatch } from '../../utils/is-match';
+import { TypeGraph } from '../../graph/type-graph.ts';
+import { mapFields } from '../../introspection/utils.ts';
+import { highlightTerm } from '../../utils/highlight.tsx';
+import { isMatch } from '../../utils/is-match.ts';
 
 interface OtherSearchResultsProps {
   typeGraph: TypeGraph;

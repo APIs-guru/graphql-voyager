@@ -2,14 +2,11 @@
   "compilerOptions": {
     "strict": true,
     "noEmit": true,
-    "module": "esnext",
-    "moduleResolution": "node",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "allowImportingTsExtensions": true,
+    "esModuleInterop": true,
     "target": "es2021"
   },
-  "include": ["./index.ts"],
-  "ts-node": {
-    "compilerOptions": {
-      "module": "CommonJS"
-    }
-  }
+  "include": ["./index.ts"]
 }

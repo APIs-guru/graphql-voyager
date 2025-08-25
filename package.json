@@ -16,8 +16,23 @@
   "engines": {
     "node": ">=24.0.0"
   },
-  "main": "dist/voyager.lib.js",
-  "types": "typings/index.d.ts",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/voyager.lib.js",
+      "browser": "./dist/voyager.lib.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./*": {
+      "import": "./dist/*",
+      "browser": "./dist/*",
+      "types": "./dist/*"
+    },
+    "./middleware": {
+      "import": "./dist/middleware/index.js",
+      "types": "./dist/middleware/index.d.ts"
+    }
+  },
   "scripts": {
     "preversion": "npm ci --ignore-scripts && npm test",
     "changelog": "ts-node scripts/gen-changelog.ts",
@@ -25,9 +40,9 @@
     "start": "npm run build:worker && webpack serve --mode=development",
     "serve": "ts-node ./scripts/serve-directory.ts -p 9090 demo-dist",
     "bundle": "rm -rf dist && webpack --mode=production",
-    "compile:middleware": "tsc -d src/middleware/index.ts --outDir middleware --lib ES6,DOM,esnext.asynciterable",
+    "build:ts": "tsc --project tsconfig.build.json",
     "build:worker": "rm -rf worker-dist && docker compose up --abort-on-container-exit --build build-worker",
-    "build:release": "rm -rf middleware && npm run build:worker && npm run bundle && npm run compile:middleware && npm run declarations",
+    "build:release": "npm run build:worker && npm run bundle && npm run build:ts",
     "build:demo": "npm run build:release && rm -rf demo-dist && cp -R demo/ demo-dist/ && cp dist/voyager.css* dist/voyager.standalone.js* demo-dist/",
     "stats": "NODE_ENV=production webpack --json --mode=production > stats.json",
     "lint": "eslint --cache --max-warnings 0 .",
@@ -36,7 +51,6 @@
     "prettier:check": "prettier --check . **/*.svg",
     "check:spell": "cspell --cache --no-progress '**/*'",
     "testonly": "npm run build:demo && npm pack && docker compose up --abort-on-container-exit --build test",
-    "declarations": "tsc --emitDeclarationOnly -p tsconfig.lib.json",
     "update-snapshots": "npm run build:demo && npm pack && docker compose up --build update-snapshots"
   },
   "peerDependencies": {
@@ -59,9 +73,9 @@
     "@types/node": "24.0.1",
     "@types/react": "19.1.8",
     "@types/react-dom": "19.1.6",
-    "@typescript-eslint/eslint-plugin": "8.8.0",
-    "@typescript-eslint/parser": "8.8.0",
-    "cspell": "9.0.2",
+    "@typescript-eslint/eslint-plugin": "8.16.0",
+    "@typescript-eslint/parser": "8.16.0",
+    "cspell": "9.4.0",
     "css-loader": "7.1.2",
     "eslint": "8.57.1",
     "eslint-plugin-import": "2.31.0",
@@ -81,8 +95,8 @@
     "style-loader": "4.0.0",
     "ts-loader": "9.5.2",
     "ts-node": "10.9.2",
-    "typescript": "5.5.4",
-    "webpack": "5.99.9",
+    "typescript": "5.7.3",
+    "webpack": "5.103.0",
     "webpack-cli": "6.0.1",
     "webpack-dev-server": "5.2.2"
   }

@@ -1,11 +1,8 @@
 import { readFileSync } from 'node:fs';
 
-const voyagerCSS = readFileSync(
-  require.resolve('../dist/voyager.css'),
-  'utf-8',
-);
+const voyagerCSS = readFileSync(require.resolve('../voyager.css'), 'utf-8');
 const voyagerStandaloneJS = readFileSync(
-  require.resolve('../dist/voyager.standalone.js'),
+  require.resolve('../voyager.standalone.js'),
   'utf-8',
 );
 

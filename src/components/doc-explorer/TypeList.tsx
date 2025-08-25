@@ -2,11 +2,11 @@ import './TypeList.css';
 
 import { GraphQLNamedType } from 'graphql/type';
 
-import { TypeGraph } from '../../graph/type-graph';
-import { isMatch } from '../../utils/is-match';
-import Description from './Description';
-import FocusTypeButton from './FocusTypeButton';
-import TypeLink from './TypeLink';
+import { TypeGraph } from '../../graph/type-graph.ts';
+import { isMatch } from '../../utils/is-match.ts';
+import Description from './Description.tsx';
+import FocusTypeButton from './FocusTypeButton.tsx';
+import TypeLink from './TypeLink.tsx';
 
 interface TypeListProps {
   typeGraph: TypeGraph;

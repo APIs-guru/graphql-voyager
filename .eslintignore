@@ -6,7 +6,6 @@
 /dist
 /demo-dist
 /worker-dist
-/middleware
 /typings
 /test-results
 /playwright-report

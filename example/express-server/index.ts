@@ -1,8 +1,8 @@
-import * as express from 'express';
+import express from 'express';
 import { createHandler } from 'graphql-http/lib/use/express';
 import { express as voyagerMiddleware } from 'graphql-voyager/middleware';
 
-import { schema } from './schema';
+import { schema } from './schema.ts';
 
 const PORT = 9090;
 const app = express();

@@ -1,7 +1,7 @@
-import * as svgPanZoom from 'svg-pan-zoom';
+import svgPanZoom from 'svg-pan-zoom';
 
-import { typeNameToId } from '../introspection/utils';
-import { stringToSvg } from '../utils/dom-helpers';
+import { typeNameToId } from '../introspection/utils.ts';
+import { stringToSvg } from '../utils/dom-helpers.ts';
 
 // FIXME: we are waiting for this [PR](https://github.com/ariutta/svg-pan-zoom/pull/379), after that this two interfaces might be removed in favor to `import { Instance, Point } from 'svg-pan-zoom'`
 interface Point {

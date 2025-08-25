@@ -16,10 +16,10 @@ import {
   mapFields,
   mapPossibleTypes,
   typeObjToId,
-} from '../introspection/utils';
-import { stringifyTypeWrappers } from '../utils/stringify-type-wrappers';
-import { unreachable } from '../utils/unreachable';
-import { TypeGraph } from './type-graph';
+} from '../introspection/utils.ts';
+import { stringifyTypeWrappers } from '../utils/stringify-type-wrappers.ts';
+import { unreachable } from '../utils/unreachable.ts';
+import { TypeGraph } from './type-graph.ts';
 
 export function getDot(typeGraph: TypeGraph): string {
   const { schema } = typeGraph;

@@ -2,9 +2,9 @@ import './Argument.css';
 
 import { GraphQLArgument, GraphQLNamedType } from 'graphql/type';
 
-import { highlightTerm } from '../../utils/highlight';
-import Markdown from '../utils/Markdown';
-import WrappedTypeName from './WrappedTypeName';
+import { highlightTerm } from '../../utils/highlight.tsx';
+import Markdown from '../utils/Markdown.tsx';
+import WrappedTypeName from './WrappedTypeName.tsx';
 
 interface ArgumentProps {
   arg: GraphQLArgument;

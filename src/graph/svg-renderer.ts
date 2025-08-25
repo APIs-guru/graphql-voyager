@@ -2,10 +2,10 @@
 import DeprecatedIconSvg from '../components/icons/deprecated-icon.svg?raw';
 // eslint-disable-next-line import/no-unresolved
 import RelayIconSvg from '../components/icons/relay-icon.svg?raw';
-import { stringToSvg } from '../utils/dom-helpers';
-import { getDot } from './dot';
-import { VizWorker } from './graphviz-worker';
-import { TypeGraph } from './type-graph';
+import { stringToSvg } from '../utils/dom-helpers.ts';
+import { getDot } from './dot.ts';
+import { VizWorker } from './graphviz-worker.ts';
+import { TypeGraph } from './type-graph.ts';
 
 const vizWorker = new VizWorker();
 

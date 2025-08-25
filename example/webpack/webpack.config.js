@@ -1,21 +1,18 @@
-const path = require('node:path');
+import path from 'node:path';
 
-module.exports = {
+const config = {
   devServer: {
     port: 9090,
     allowedHosts: 'all',
-    static: { directory: __dirname },
+    static: { directory: import.meta.dirname },
     // needed to prevent info messages during integration tests
     client: { logging: 'warn' },
   },
   // disable hints since Voyager is too big :(
   performance: { hints: false },
-  resolve: {
-    extensions: ['.mjs', '.ts', '.tsx', '.js'],
-  },
   entry: ['./index.tsx'],
   output: {
-    path: path.resolve(__dirname, 'dist'),
+    path: path.resolve(import.meta.dirname, 'dist'),
     filename: 'main.js',
   },
   module: {
@@ -31,3 +28,5 @@ module.exports = {
     ],
   },
 };
+
+export default config;

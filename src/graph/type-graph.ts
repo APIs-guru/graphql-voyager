@@ -10,7 +10,7 @@ import {
   isUnionType,
 } from 'graphql/type';
 
-import { VoyagerDisplayOptions } from '../components/Voyager';
+import { VoyagerDisplayOptions } from '../components/Voyager.tsx';
 
 export interface TypeGraph {
   schema: GraphQLSchema;

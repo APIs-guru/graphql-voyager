@@ -4,7 +4,7 @@ import IconButton from '@mui/material/IconButton';
 import { GraphQLNamedType } from 'graphql/type';
 import { Component } from 'react';
 
-import TypeDetails from '../doc-explorer/TypeDetails';
+import TypeDetails from '../doc-explorer/TypeDetails.tsx';
 import CloseIcon from '../icons/close-black.svg';
 
 interface ScalarDetailsProps {

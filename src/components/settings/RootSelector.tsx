@@ -2,7 +2,7 @@ import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
 import { GraphQLNamedType } from 'graphql/type';
 
-import { isNode, TypeGraph } from '../../graph/type-graph';
+import { isNode, TypeGraph } from '../../graph/type-graph.ts';
 
 interface RootSelectorProps {
   typeGraph: TypeGraph;

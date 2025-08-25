@@ -15,8 +15,8 @@ import Typography from '@mui/material/Typography';
 import { buildClientSchema } from 'graphql/utilities';
 import { ReactElement, useState } from 'react';
 
-import { voyagerIntrospectionQuery } from '../utils/introspection-query';
-import { sdlToSchema } from '../utils/sdl-to-introspection';
+import { voyagerIntrospectionQuery } from '../utils/introspection-query.ts';
+import { sdlToSchema } from '../utils/sdl-to-introspection.ts';
 
 enum InputType {
   Presets = 'Presets',
