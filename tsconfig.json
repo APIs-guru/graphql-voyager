@@ -22,13 +22,13 @@
     // end copy
 
     "resolveJsonModule": true,
-    "module": "esnext",
-    "moduleResolution": "node",
+    "allowImportingTsExtensions": true,
+    "rewriteRelativeImportExtensions": true,
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
     "target": "es2021",
     "allowSyntheticDefaultImports": true,
-    "sourceMap": true,
     "noEmit": true,
-    "pretty": true,
     "lib": ["es2022", "dom", "dom.iterable"],
     "jsx": "react-jsx"
   },

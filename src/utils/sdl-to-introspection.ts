@@ -1,8 +1,10 @@
 import { parse } from 'graphql/language';
 import { buildSchema } from 'graphql/utilities';
-import { KnownDirectivesRule } from 'graphql/validation/rules/KnownDirectivesRule';
-import { specifiedSDLRules } from 'graphql/validation/specifiedRules';
-import { validateSDL } from 'graphql/validation/validate';
+import { KnownDirectivesRule } from 'graphql/validation';
+// eslint-disable-next-line import/no-unresolved
+import { specifiedSDLRules } from 'graphql/validation/specifiedRules.ts';
+// eslint-disable-next-line import/no-unresolved
+import { validateSDL } from 'graphql/validation/validate.ts';
 
 const validationRules = specifiedSDLRules.filter(
   // Many consumes/produces SDL files with custom directives and without defining them.

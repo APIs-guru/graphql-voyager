@@ -1,4 +1,4 @@
-import renderVoyagerPage, { MiddlewareOptions } from './render-voyager-page';
+import renderVoyagerPage, { MiddlewareOptions } from './render-voyager-page.ts';
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const pkg = require('../package.json');

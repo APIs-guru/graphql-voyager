@@ -19,10 +19,10 @@ import {
   lexicographicSortSchema,
 } from 'graphql';
 
-import { VoyagerDisplayOptions } from '../components/Voyager';
-import { collectDirectlyReferencedTypes } from '../utils/collect-referenced-types';
-import { mapValues } from '../utils/mapValues';
-import { transformSchema } from '../utils/transformSchema';
+import { VoyagerDisplayOptions } from '../components/Voyager.tsx';
+import { collectDirectlyReferencedTypes } from '../utils/collect-referenced-types.ts';
+import { mapValues } from '../utils/mapValues.ts';
+import { transformSchema } from '../utils/transformSchema.ts';
 
 declare module 'graphql' {
   interface GraphQLFieldExtensions<_TSource, _TContext, _TArgs> {

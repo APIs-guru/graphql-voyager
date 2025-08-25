@@ -1,6 +1,6 @@
 import './Description.css';
 
-import Markdown from '../utils/Markdown';
+import Markdown from '../utils/Markdown.tsx';
 
 interface DescriptionProps {
   text: string | undefined | null;

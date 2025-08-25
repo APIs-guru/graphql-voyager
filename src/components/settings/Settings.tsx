@@ -1,9 +1,9 @@
 import Checkbox from '@mui/material/Checkbox';
 import Stack from '@mui/material/Stack';
 
-import { TypeGraph } from '../../graph/type-graph';
-import { VoyagerDisplayOptions } from '../Voyager';
-import RootSelector from './RootSelector';
+import { TypeGraph } from '../../graph/type-graph.ts';
+import { VoyagerDisplayOptions } from '../Voyager.tsx';
+import RootSelector from './RootSelector.tsx';
 
 interface SettingsProps {
   typeGraph: TypeGraph | null;

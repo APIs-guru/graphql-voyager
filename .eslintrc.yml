@@ -34,6 +34,8 @@ overrides:
       sourceType: module
       project: ['tsconfig.json']
     plugins: ['@typescript-eslint']
+    settings:
+      'import/extensions': ['.ts', '.tsx', '.js']
     extends:
       - 'plugin:import/typescript'
       - 'plugin:@typescript-eslint/strict'

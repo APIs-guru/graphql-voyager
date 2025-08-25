@@ -5,9 +5,9 @@ import {
   VizWorkerHash,
   VizWorkerSource,
   // eslint-disable-next-line import/no-unresolved
-} from '../../worker/voyager.worker';
-import { computeHash } from '../utils/compute-hash';
-import { LocalStorageLRUCache } from '../utils/local-storage-lru-cache';
+} from '../../worker/voyager.worker.ts';
+import { computeHash } from '../utils/compute-hash.ts';
+import { LocalStorageLRUCache } from '../utils/local-storage-lru-cache.ts';
 
 export class VizWorker {
   private _cache = new LocalStorageLRUCache({

@@ -3,14 +3,14 @@ import './DocExplorer.css';
 import { assertCompositeType, GraphQLNamedType } from 'graphql/type';
 import { Component } from 'react';
 
-import { isNode, TypeGraph } from '../../graph/type-graph';
-import { extractTypeName, typeObjToId } from '../../introspection/utils';
-import SearchBox from '../utils/SearchBox';
-import FocusTypeButton from './FocusTypeButton';
-import OtherSearchResults from './OtherSearchResults';
-import TypeDoc from './TypeDoc';
-import TypeInfoPopover from './TypeInfoPopover';
-import TypeList from './TypeList';
+import { isNode, TypeGraph } from '../../graph/type-graph.ts';
+import { extractTypeName, typeObjToId } from '../../introspection/utils.ts';
+import SearchBox from '../utils/SearchBox.tsx';
+import FocusTypeButton from './FocusTypeButton.tsx';
+import OtherSearchResults from './OtherSearchResults.tsx';
+import TypeDoc from './TypeDoc.tsx';
+import TypeInfoPopover from './TypeInfoPopover.tsx';
+import TypeList from './TypeList.tsx';
 
 interface DocExplorerProps {
   typeGraph: TypeGraph | null;

@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { buildSchema, graphqlSync } from 'graphql';
 
-import { gotoVoyagerPage, SchemaPresets } from './PageObjectModel';
+import { gotoVoyagerPage, SchemaPresets } from './PageObjectModel.ts';
 
 test('open demo', async ({ page }) => {
   const voyagerPage = await gotoVoyagerPage(page);

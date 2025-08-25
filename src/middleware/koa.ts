@@ -1,4 +1,4 @@
-import renderVoyagerPage, { MiddlewareOptions } from './render-voyager-page';
+import renderVoyagerPage, { MiddlewareOptions } from './render-voyager-page.ts';
 
 export default function koaMiddleware(
   options: MiddlewareOptions,

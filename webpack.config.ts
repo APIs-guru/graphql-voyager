@@ -17,15 +17,16 @@ const baseConfig: webpack.Configuration = {
   // disable hints since Voyager is too big :(
   performance: { hints: false },
   resolve: {
-    extensions: ['.ts', '.tsx', '.mjs', '.js', '.json', '.css', '.svg'],
+    extensionAlias: {
+      '.js': ['.ts', '.tsx', '.mjs', '.js'],
+      '.ts': ['.mjs', '.js', '.ts'],
+    },
+    extensions: ['.js', '.json', '.css', '.svg'],
     alias: { '../../worker': '../../worker-dist' },
   },
   output: {
     path: path.join(import.meta.dirname, 'dist'),
     sourceMapFilename: '[file].map',
-    library: 'GraphQLVoyager',
-    libraryTarget: 'umd',
-    umdNamedDefine: true,
   },
   module: {
     rules: [
@@ -33,7 +34,10 @@ const baseConfig: webpack.Configuration = {
         test: /\.tsx?$/,
         use: {
           loader: 'ts-loader',
-          options: { compilerOptions: { noEmit: false } },
+          options: {
+            transpileOnly: true,
+            compilerOptions: { noEmit: false },
+          },
         },
         exclude: [/\.(spec|e2e)\.ts$/],
       },
@@ -95,18 +99,15 @@ const config: Array<webpack.Configuration> = [
   {
     ...baseConfig,
     entry: './src/index.ts',
-    externalsType: 'commonjs',
-    externals: ({ request }: ExternalItemFunctionData) =>
-      Promise.resolve(
-        [
-          ...Object.keys(packageJSON.peerDependencies),
-          ...Object.keys(packageJSON.dependencies),
-        ].some((pkg) => request === pkg || request?.startsWith(pkg + '/')),
-      ),
+    externalsType: 'module',
+    externals,
     output: {
       ...baseConfig.output,
       filename: 'voyager.lib.js',
+      library: { type: 'modern-module' },
+      libraryTarget: 'modern-module',
     },
+    experiments: { outputModule: true },
   },
   {
     ...baseConfig,
@@ -116,7 +117,9 @@ const config: Array<webpack.Configuration> = [
     output: {
       ...baseConfig.output,
       filename: 'voyager.standalone.js',
-      sourceMapFilename: '[file].map',
+      library: 'GraphQLVoyager',
+      libraryTarget: 'umd',
+      umdNamedDefine: true,
     },
     devServer: {
       port: 9090,
@@ -128,3 +131,12 @@ const config: Array<webpack.Configuration> = [
   },
 ];
 export default config;
+
+function externals({ request }: ExternalItemFunctionData) {
+  return Promise.resolve(
+    [
+      ...Object.keys(packageJSON.peerDependencies),
+      ...Object.keys(packageJSON.dependencies),
+    ].some((pkg) => request === pkg || request?.startsWith(pkg + '/')),
+  );
+}

@@ -6,10 +6,10 @@ import {
   isInputObjectType,
 } from 'graphql/type';
 
-import Markdown from '../utils/Markdown';
-import Description from './Description';
-import EnumValue from './EnumValue';
-import WrappedTypeName from './WrappedTypeName';
+import Markdown from '../utils/Markdown.tsx';
+import Description from './Description.tsx';
+import EnumValue from './EnumValue.tsx';
+import WrappedTypeName from './WrappedTypeName.tsx';
 
 interface TypeDetailsProps {
   type: GraphQLNamedType;

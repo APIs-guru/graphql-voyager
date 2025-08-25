@@ -17,17 +17,17 @@ import {
   useState,
 } from 'react';
 
-import { getTypeGraph } from '../graph/type-graph';
-import { getSchema } from '../introspection/introspection';
-import { extractTypeName, typeNameToId } from '../introspection/utils';
-import { MaybePromise, usePromise } from '../utils/usePromise';
-import DocExplorer from './doc-explorer/DocExplorer';
-import GraphViewport from './GraphViewport';
-import { IntrospectionModal } from './IntrospectionModal';
-import { theme } from './MUITheme';
-import Settings from './settings/Settings';
-import PoweredBy from './utils/PoweredBy';
-import { VoyagerLogo } from './utils/VoyagerLogo';
+import { getTypeGraph } from '../graph/type-graph.ts';
+import { getSchema } from '../introspection/introspection.ts';
+import { extractTypeName, typeNameToId } from '../introspection/utils.ts';
+import { MaybePromise, usePromise } from '../utils/usePromise.ts';
+import DocExplorer from './doc-explorer/DocExplorer.tsx';
+import GraphViewport from './GraphViewport.tsx';
+import { IntrospectionModal } from './IntrospectionModal.tsx';
+import { theme } from './MUITheme.tsx';
+import Settings from './settings/Settings.tsx';
+import PoweredBy from './utils/PoweredBy.tsx';
+import { VoyagerLogo } from './utils/VoyagerLogo.tsx';
 
 export interface VoyagerDisplayOptions {
   rootType?: string;

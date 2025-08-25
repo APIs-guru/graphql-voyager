@@ -1,6 +1,6 @@
 import { GraphQLEnumValue } from 'graphql/type';
 
-import Markdown from '../utils/Markdown';
+import Markdown from '../utils/Markdown.tsx';
 
 interface EnumValueProps {
   value: GraphQLEnumValue;

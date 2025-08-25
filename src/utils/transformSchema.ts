@@ -25,7 +25,7 @@ import {
   isUnionType,
 } from 'graphql/type';
 
-import { mapValues } from './mapValues';
+import { mapValues } from './mapValues.ts';
 
 // FIXME: Contribute to graphql-js
 export type NamedTypeTransformer = (

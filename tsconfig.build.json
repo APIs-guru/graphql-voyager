@@ -2,8 +2,11 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "noEmit": false,
+    "rootDir": "src",
+    "outDir": "dist",
     "declaration": true,
-    "declarationDir": "typings"
+    "sourceMap": true,
+    "pretty": true
   },
   "include": ["./src/**/*.ts", "./src/**/*.tsx", "./manual-types.d.ts"]
 }
