@@ -38,12 +38,12 @@
     "changelog": "ts-node scripts/gen-changelog.ts",
     "test": "npm run lint && npm run check && npm run testonly && npm run prettier:check && npm run check:spell",
     "start": "npm run build:worker && webpack serve --mode=development",
-    "serve": "ts-node ./scripts/serve-directory.ts -p 9090 demo-dist",
+    "serve": "ts-node ./scripts/serve-directory.ts -p 9090 demo-dist/graphql-voyager",
     "bundle": "rm -rf dist && webpack --mode=production",
     "build:ts": "tsc --project tsconfig.build.json",
     "build:worker": "rm -rf worker-dist && docker compose up --abort-on-container-exit --build build-worker",
     "build:release": "npm run build:worker && npm run bundle && npm run build:ts",
-    "build:demo": "npm run build:release && rm -rf demo-dist && cp -R demo/ demo-dist/ && cp dist/voyager.css* dist/voyager.standalone.js* demo-dist/",
+    "build:demo": "npm run build:release && rm -rf demo-dist && mkdir demo-dist && cp -R demo/ demo-dist/graphql-voyager/ && cp dist/voyager.css* dist/voyager.standalone.js* demo-dist/graphql-voyager/",
     "stats": "NODE_ENV=production webpack --json --mode=production > stats.json",
     "lint": "eslint --cache --max-warnings 0 .",
     "check": "tsc",
@@ -51,7 +51,8 @@
     "prettier:check": "prettier --check . **/*.svg",
     "check:spell": "cspell --cache --no-progress '**/*'",
     "testonly": "npm run build:demo && npm pack && docker compose up --abort-on-container-exit --build test",
-    "update-snapshots": "npm run build:demo && npm pack && docker compose up --build update-snapshots"
+    "update-snapshots": "npm run build:demo && npm pack && docker compose up --build update-snapshots",
+    "deploy": "wrangler deploy"
   },
   "peerDependencies": {
     "graphql": ">=16.5.0",
@@ -98,6 +99,7 @@
     "typescript": "5.7.3",
     "webpack": "5.103.0",
     "webpack-cli": "6.0.1",
-    "webpack-dev-server": "5.2.2"
+    "webpack-dev-server": "5.2.2",
+    "wrangler": "4.33.1"
   }
 }
