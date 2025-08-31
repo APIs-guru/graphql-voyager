@@ -1,0 +1,10 @@
+name = "graphql-voyager"
+compatibility_date = "2025-08-26"
+
+[[routes]]
+pattern = "apis.guru/graphql-voyager*"
+zone_name = "apis.guru"
+
+[assets]
+directory = "./demo-dist"
+run_worker_first = false
