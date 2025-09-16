@@ -191,23 +191,25 @@ export default function Voyager(props: VoyagerProps) {
   }
 
   function renderGraphViewport() {
+    const showSettings = !hideSettings && typeGraph != null;
+
     return (
       <Box
         sx={(theme) => ({
           flex: 1,
-          position: 'relative',
-          display: 'inline-block',
-          width: '100%',
-          height: '100%',
-          maxHeight: '100%',
+          position: "relative",
+          display: "inline-block",
+          width: "100%",
+          height: "100%",
+          maxHeight: "100%",
 
-          [theme.breakpoints.down('md')]: {
-            height: '50%',
-            maxWidth: 'none',
+          [theme.breakpoints.down("md")]: {
+            height: "50%",
+            maxWidth: "none",
           },
         })}
       >
-        {!hideSettings && (
+        {showSettings && (
           <Settings
             options={displayOptions}
             typeGraph={typeGraph}
