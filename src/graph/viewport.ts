@@ -41,6 +41,7 @@ export class Viewport {
     public container: HTMLElement,
     onSelectNode: (id: string | null) => void,
     onSelectEdge: (id: string) => void,
+    options: SvgPanZoom.Options = {},
   ) {
     this.onSelectNode = onSelectNode;
     this.onSelectEdge = onSelectEdge;
@@ -51,7 +52,7 @@ export class Viewport {
 
     // Allow the SVG dimensions to be computed
     // Quick fix for SVG manipulation issues.
-    setTimeout(() => this.enableZoom(), 0);
+    setTimeout(() => this.enableZoom(options), 0);
     this.bindClick();
     this.bindHover();
 
@@ -66,13 +67,14 @@ export class Viewport {
     this.resizeObserver.observe(this.container);
   }
 
-  enableZoom() {
+  enableZoom(options: SvgPanZoom.Options = {}) {
     const svgHeight = this.$svg['height'].baseVal.value;
     const svgWidth = this.$svg['width'].baseVal.value;
     const bbRect = this.container.getBoundingClientRect();
     this.maxZoom = Math.max(svgHeight / bbRect.height, svgWidth / bbRect.width);
 
     this.zoomer = svgPanZoom(this.$svg, {
+      ...options,
       zoomScaleSensitivity: 0.25,
       minZoom: 0.95,
       maxZoom: this.maxZoom,

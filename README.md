@@ -41,6 +41,7 @@ module system it is exported as `GraphQLVoyager` global variable.
 - `hideDocs` [`boolean`, default `false`] - hide the docs sidebar
 - `hideSettings` [`boolean`, default `false`] - hide settings panel
 - `hideVoyagerLogo` [`boolean`, default `true`] - hide voyager logo
+- `disableMouseWheelZoom` [`boolean`, default `false`] - disables scroll handler
 
 ## Using pre-bundled version
 

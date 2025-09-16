@@ -48,6 +48,7 @@ export interface VoyagerProps {
   hideDocs?: boolean;
   hideSettings?: boolean;
   hideVoyagerLogo?: boolean;
+  disableMouseWheelZoom?: boolean;
 
   children?: ReactNode;
 }
@@ -120,6 +121,7 @@ export default function Voyager(props: VoyagerProps) {
     hideSettings = false,
     // TODO: switch to false in the next major version
     hideVoyagerLogo = true,
+    disableMouseWheelZoom = false,
   } = props;
 
   const viewportRef = useRef<GraphViewport>(null);
@@ -223,6 +225,7 @@ export default function Voyager(props: VoyagerProps) {
           onSelectNode={handleSelectNode}
           onSelectEdge={handleSelectEdge}
           ref={viewportRef}
+          disableMouseWheelZoom={disableMouseWheelZoom}
         />
       </Box>
     );
