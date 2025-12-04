@@ -82,7 +82,6 @@ jobs:
         run: |
           git clone --depth 1 https://github.com/github/gitignore.git
 
-          rm gitignore/Global/ModelSim.gitignore
           rm gitignore/Global/Images.gitignore
           rm gitignore/Global/VirtualEnv.gitignore
           cat gitignore/Node.gitignore gitignore/Global/*.gitignore > all.gitignore

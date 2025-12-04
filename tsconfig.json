@@ -42,10 +42,5 @@
     "scripts/**/*.ts",
     "playwright.config.ts",
     "webpack.config.ts"
-  ],
-  "ts-node": {
-    "compilerOptions": {
-      "module": "CommonJS"
-    }
-  }
+  ]
 }
