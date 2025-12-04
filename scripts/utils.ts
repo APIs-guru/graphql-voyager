@@ -3,7 +3,7 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 
 export function localRepoPath(...paths: ReadonlyArray<string>): string {
-  const repoDir = path.resolve(__dirname, '..');
+  const repoDir = path.resolve(import.meta.dirname, '..');
   return path.join(repoDir, ...paths);
 }
 
