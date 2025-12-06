@@ -14,7 +14,7 @@
     "url": "https://github.com/APIs-guru/graphql-voyager/issues"
   },
   "engines": {
-    "node": ">=24.0.0"
+    "node": ">=25.2.0"
   },
   "type": "module",
   "exports": {
