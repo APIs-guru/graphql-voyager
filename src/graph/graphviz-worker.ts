@@ -1,11 +1,8 @@
-import {
-  RenderRequest,
-  RenderResponse,
-  RenderResult,
-  VizWorkerHash,
-  VizWorkerSource,
-  // eslint-disable-next-line import/no-unresolved
-} from '../../worker/voyager.worker.ts';
+// eslint-disable-next-line import/no-unresolved
+import { type RenderResult, WASM_HASH as DotVizWorkerHash } from 'dotviz';
+import DotVizWorkerSource from 'dotviz/dotviz-inline-worker';
+import { type RenderRequest, type RenderResponse } from 'dotviz/dotviz-worker';
+
 import { computeHash } from '../utils/compute-hash.ts';
 import { LocalStorageLRUCache } from '../utils/local-storage-lru-cache.ts';
 
@@ -18,13 +15,20 @@ export class VizWorker {
   private _listeners: Map<number, (result: RenderResult) => void> = new Map();
 
   constructor() {
-    const blob = new Blob([VizWorkerSource], {
+    const blob = new Blob([DotVizWorkerSource], {
       type: 'application/javascript',
     });
     const url = URL.createObjectURL(blob);
-    this._worker = new Worker(url, { name: 'graphql-voyager-worker' });
+    this._worker = new Worker(url, {
+      name: 'graphql-voyager-worker',
+      type: 'module',
+    });
     URL.revokeObjectURL(url);
 
+    this._worker.addEventListener('error', (event) => {
+      // FIXME: better error handling
+      console.error('unexpected error from dotviz worker: ', event);
+    });
     this._worker.addEventListener('message', (event) => {
       const { id, result } = event.data as RenderResponse;
 
@@ -62,29 +66,39 @@ export class VizWorker {
 
   async generateCacheKey(dot: string): Promise<string | null> {
     const dotHash = await computeHash(dot);
-    return dotHash == null ? null : `worker:${VizWorkerHash}:dot:${dotHash}`;
+    return dotHash == null ? null : `worker:${DotVizWorkerHash}:dot:${dotHash}`;
   }
 
   _renderString(src: string): Promise<string> {
-    return new Promise((resolve, reject) => {
-      const id = this._listeners.size;
+    const id = this._listeners.size;
+    const renderRequest: RenderRequest = {
+      id,
+      input: src,
+      options: { engine: 'dot', format: 'svg' },
+    };
 
-      this._listeners.set(id, function (result): void {
-        if ('error' in result) {
-          const { error } = result;
-          const e = new Error(error.message);
-          if (error.fileName) (e as any).fileName = error.fileName;
-          if (error.lineNumber) (e as any).lineNumber = error.lineNumber;
-          if (error.stack) (e as any).stack = error.stack;
-          return reject(e);
-        }
-        console.timeEnd('graphql-voyager: Rendering SVG');
-        resolve(result.value);
-      });
+    return new Promise((resolve, reject) => {
+      this._listeners.set(id, RenderResponseListener);
 
       console.time('graphql-voyager: Rendering SVG');
-      const renderRequest: RenderRequest = { id, src };
       this._worker.postMessage(renderRequest);
+
+      function RenderResponseListener(result: RenderResult): void {
+        console.timeEnd('graphql-voyager: Rendering SVG');
+        if (result.errors.length !== 0) {
+          return reject(
+            AggregateError([
+              result.errors.map(
+                (error) => new Error(`${error.level} : ${error.message}`),
+              ),
+            ]),
+          );
+        }
+        if (result.status === 'success') {
+          return resolve(result.output);
+        }
+        return reject(new Error('invalid response from dotviz worker'));
+      }
     });
   }
 }

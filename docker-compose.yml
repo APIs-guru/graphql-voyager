@@ -1,10 +1,4 @@
 services:
-  build-worker:
-    build:
-      context: .
-      dockerfile: ./worker/Dockerfile
-    stdin_open: true
-    tty: true
   serve-webpack-example:
     build:
       context: .

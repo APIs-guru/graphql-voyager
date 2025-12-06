@@ -22,7 +22,6 @@ const baseConfig: webpack.Configuration = {
       '.ts': ['.mjs', '.js', '.ts'],
     },
     extensions: ['.js', '.json', '.css', '.svg'],
-    alias: { '../../worker': '../../worker-dist' },
   },
   output: {
     path: path.join(import.meta.dirname, 'dist'),
@@ -30,6 +29,10 @@ const baseConfig: webpack.Configuration = {
   },
   module: {
     rules: [
+      {
+        resourceQuery: /raw/,
+        type: 'asset/source',
+      },
       {
         test: /\.tsx?$/,
         use: {
@@ -64,10 +67,6 @@ const baseConfig: webpack.Configuration = {
       {
         test: /variables\.css$/,
         use: [{ loader: 'postcss-variables-loader?es5=1' }],
-      },
-      {
-        resourceQuery: /raw/,
-        type: 'asset/source',
       },
       {
         test: /\.svg$/,

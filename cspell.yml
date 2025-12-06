@@ -6,8 +6,6 @@ ignorePaths:
   - cspell.yml
   - package.json
   - demo/presets
-  - worker/viz.cpp
-  - worker/Dockerfile
   - tests/*-snapshots/
 dictionaries:
   - html
@@ -22,6 +20,7 @@ overrides:
       - requestfailed
 
 words:
+  - dotviz
   - graphviz
   - svgr
   - reactroot # FIXME https://github.com/facebook/react/issues/10971
@@ -43,4 +42,3 @@ words:
   - pageview
   - jsdelivr
   - GraphiQL
-  - nojekyll

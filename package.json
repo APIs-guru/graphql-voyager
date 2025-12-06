@@ -37,12 +37,11 @@
     "preversion": "npm ci --ignore-scripts && npm test",
     "changelog": "node scripts/gen-changelog.ts",
     "test": "npm run lint && npm run check && npm run testonly && npm run prettier:check && npm run check:spell",
-    "start": "npm run build:worker && webpack serve --mode=development",
+    "start": "webpack serve --mode=development",
     "serve": "node ./scripts/serve-directory.ts -p 9090 demo-dist/graphql-voyager",
     "bundle": "rm -rf dist && webpack --mode=production",
     "build:ts": "tsc --project tsconfig.build.json",
-    "build:worker": "node scripts/bundle_worker.ts",
-    "build:release": "npm run build:worker && npm run bundle && npm run build:ts",
+    "build:release": "npm run bundle && npm run build:ts",
     "build:demo": "npm run build:release && rm -rf demo-dist && mkdir demo-dist && cp -R demo/ demo-dist/graphql-voyager/ && cp dist/voyager.css* dist/voyager.standalone.js* demo-dist/graphql-voyager/",
     "stats": "NODE_ENV=production webpack --json --mode=production > stats.json",
     "lint": "eslint --cache --max-warnings 0 .",
@@ -65,6 +64,7 @@
     "@mui/lab": "7.0.0-beta.13",
     "@mui/material": "7.1.1",
     "commonmark": "0.31.2",
+    "dotviz": "0.0.6",
     "svg-pan-zoom": "3.6.2"
   },
   "devDependencies": {

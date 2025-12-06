@@ -33,7 +33,7 @@
     "jsx": "react-jsx"
   },
   "compileOnSave": false,
-  "exclude": ["node_modules", ".tmp", "dist", "demo-dist", "worker-dist"],
+  "exclude": ["node_modules", ".tmp", "dist", "demo-dist"],
   "include": [
     "./src/**/*.ts",
     "./src/**/*.tsx",
