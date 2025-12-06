@@ -38,8 +38,8 @@
   <g
     id="viewport-{datetime}"
     class="svg-pan-zoom_viewport"
-    transform="matrix(12.067893249583124,0,0,12.067893249583124,137.41232035630603,25.025006935590703)"
-    style="transform: matrix(12.0679, 0, 0, 12.0679, 137.412, 25.025)"
+    transform="matrix(12.037341621103167,0,0,12.037341621103167,137.94621083932591,25.025005966424942)"
+    style="transform: matrix(12.0373, 0, 0, 12.0373, 137.946, 25.025)"
   >
     <g
       id="graph0"
@@ -60,6 +60,7 @@
             points="8,-35.2 8,-66.8 93.81,-66.8 93.81,-35.2 8,-35.2"
           ></polygon>
           <text
+            xml:space="preserve"
             text-anchor="start"
             x="26.4"
             y="-45.6"
@@ -76,6 +77,7 @@
             points="8,-4 8,-35.2 93.81,-35.2 93.81,-4 8,-4"
           ></polygon>
           <text
+            xml:space="preserve"
             text-anchor="start"
             x="14"
             y="-15.8"
@@ -87,6 +89,7 @@
           </text>
 
           <text
+            xml:space="preserve"
             text-anchor="start"
             x="46.02"
             y="-14.8"
