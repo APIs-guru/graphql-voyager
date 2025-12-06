@@ -5,7 +5,6 @@
 /node_modules
 /dist
 /demo-dist
-/worker-dist
 /typings
 /test-results
 /playwright-report
