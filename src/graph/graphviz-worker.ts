@@ -1,10 +1,20 @@
-// eslint-disable-next-line import/no-unresolved
-import { type RenderResult, WASM_HASH as DotVizWorkerHash } from 'dotviz';
+import {
+  type Graph,
+  RenderOptions,
+  type RenderResult,
+  WASM_HASH as DotVizWorkerHash,
+  // eslint-disable-next-line import/no-unresolved
+} from 'dotviz';
 import DotVizWorkerSource from 'dotviz/dotviz-inline-worker';
-import { type RenderRequest, type RenderResponse } from 'dotviz/dotviz-worker';
+import { type RenderResponse } from 'dotviz/dotviz-worker';
 
 import { computeHash } from '../utils/compute-hash.ts';
 import { LocalStorageLRUCache } from '../utils/local-storage-lru-cache.ts';
+
+export interface RenderArgs {
+  input: string | Graph;
+  options: RenderOptions;
+}
 
 export class VizWorker {
   private _cache = new LocalStorageLRUCache({
@@ -37,8 +47,8 @@ export class VizWorker {
     });
   }
 
-  async renderString(dot: string): Promise<string> {
-    const cacheKey = await this.generateCacheKey(dot);
+  async render(renderArgs: RenderArgs): Promise<string> {
+    const cacheKey = await this.generateCacheKey(renderArgs);
 
     if (cacheKey != null) {
       try {
@@ -52,7 +62,7 @@ export class VizWorker {
       }
     }
 
-    const svg = await this._renderString(dot);
+    const svg = await this._render(renderArgs);
 
     if (cacheKey != null) {
       try {
@@ -64,24 +74,18 @@ export class VizWorker {
     return svg;
   }
 
-  async generateCacheKey(dot: string): Promise<string | null> {
-    const dotHash = await computeHash(dot);
+  async generateCacheKey(renderArgs: RenderArgs): Promise<string | null> {
+    const dotHash = await computeHash(JSON.stringify(renderArgs));
     return dotHash == null ? null : `worker:${DotVizWorkerHash}:dot:${dotHash}`;
   }
 
-  _renderString(src: string): Promise<string> {
-    const id = this._listeners.size;
-    const renderRequest: RenderRequest = {
-      id,
-      input: src,
-      options: { engine: 'dot', format: 'svg' },
-    };
-
+  _render(renderArgs: RenderArgs): Promise<string> {
     return new Promise((resolve, reject) => {
+      const id = this._listeners.size;
       this._listeners.set(id, RenderResponseListener);
 
       console.time('graphql-voyager: Rendering SVG');
-      this._worker.postMessage(renderRequest);
+      this._worker.postMessage({ id, ...renderArgs });
 
       function RenderResponseListener(result: RenderResult): void {
         console.timeEnd('graphql-voyager: Rendering SVG');
