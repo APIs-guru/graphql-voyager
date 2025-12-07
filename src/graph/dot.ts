@@ -1,8 +1,9 @@
+// eslint-disable-next-line import/no-unresolved
+import { Edge, Graph, Node } from 'dotviz';
 import {
   getNamedType,
   GraphQLField,
   GraphQLNamedType,
-  GraphQLObjectType,
   isEnumType,
   isInputObjectType,
   isInterfaceType,
@@ -21,179 +22,129 @@ import { stringifyTypeWrappers } from '../utils/stringify-type-wrappers.ts';
 import { unreachable } from '../utils/unreachable.ts';
 import { TypeGraph } from './type-graph.ts';
 
-export function getDot(typeGraph: TypeGraph): string {
+export function getDot(typeGraph: TypeGraph): Graph {
   const { schema } = typeGraph;
 
-  const nodeResults = [];
-  for (const node of typeGraph.nodes.values()) {
-    nodeResults.push(printNode(node));
-  }
+  const nodes: Array<Node> = [];
+  const edges: Array<Edge> = [];
+  for (const type of typeGraph.nodes.values()) {
+    const fields = mapFields<string>(type, (id, field) => {
+      const fieldType = getNamedType(field.type);
+      if (isNode(fieldType)) {
+        edges.push({
+          tail: type.name,
+          head: fieldType.name,
+          attributes: {
+            tailport: field.name,
+            id: `${id} => ${typeObjToId(fieldType)}`,
+            label: `${type.name}:${field.name}`,
+          },
+        });
+        return fieldLabel(id, field);
+      }
+      return typeGraph.showLeafFields ? fieldLabel(id, field) : '';
+    }).join('');
 
-  return `
-    digraph {
-      graph [
-        rankdir = "LR"
-      ];
-      node [
-        fontsize = "16"
-        fontname = "helvetica"
-        shape = "plaintext"
-      ];
-      edge [
-      ];
-      ranksep = 2.0
-      ${nodeResults.join('\n')}
-    }
-  `;
-
-  function printNode(node: GraphQLNamedType) {
-    return `
-      "${node.name}" [
-        id = "${typeObjToId(node)}"
-        label = ${nodeLabel(node)}
-      ]
-      ${forEachField((id, field) => {
-        if (!isNode(getNamedType(field.type))) {
-          return null;
-        }
-        return `
-            "${node.name}":"${field.name}" -> "${
-              getNamedType(field.type).name
-            }" [
-              id = "${id} => ${typeObjToId(getNamedType(field.type))}"
-              label = "${node.name}:${field.name}"
-            ]
-          `;
-      })};
-      ${forEachPossibleTypes(
-        (id, type) => `
-        "${node.name}":"${type.name}" -> "${type.name}" [
-          id = "${id} => ${typeObjToId(type)}"
-          style = "dashed"
-        ]
-      `,
-      )}
-      ${forEachDerivedTypes(
-        (id, type) => `
-        "${node.name}":"${type.name}" -> "${type.name}" [
-          id = "${id} => ${typeObjToId(type)}"
-          style = "dotted"
-        ]
-      `,
-      )}
-    `;
-
-    function nodeLabel(node: GraphQLNamedType): string {
-      const htmlID = HtmlId('TYPE_TITLE::' + node.name);
-      const kindLabel = isObjectType(node)
-        ? ''
-        : '&lt;&lt;' + typeToKind(node).toLowerCase() + '&gt;&gt;';
-
+    const possibleTypes = mapPossibleTypes<string>(type, (id, possibleType) => {
+      edges.push({
+        tail: type.name,
+        head: possibleType.name,
+        attributes: {
+          tailport: possibleType.name,
+          id: `${id} => ${typeObjToId(possibleType)}`,
+          style: 'dashed',
+        },
+      });
       return `
-        <<TABLE ALIGN="LEFT" BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="5">
-          <TR>
-            <TD CELLPADDING="4" ${htmlID}><FONT POINT-SIZE="18">${
-              node.name
-            }</FONT><BR/>${kindLabel}</TD>
-          </TR>
-          ${nodeFields()}
-          ${possibleTypes()}
-          ${derivedTypes()}
-        </TABLE>>
+        <TR>
+          <TD ${HtmlId(id)} ALIGN="LEFT" PORT="${possibleType.name}">${possibleType.name}</TD>
+        </TR>
       `;
-    }
+    }).join('');
 
-    function isNode(type: GraphQLNamedType): boolean {
-      return typeGraph.nodes.has(type.name);
-    }
-
-    function nodeFields() {
-      return forEachField((id, field) => {
-        const namedType = getNamedType(field.type);
-        if (typeGraph.showLeafFields !== true && !isNode(namedType)) {
-          return null;
-        }
-
-        const parts = stringifyTypeWrappers(field.type).map(TEXT);
-        const relayIcon = field.extensions.isRelayField ? TEXT('{R}') : '';
-        const deprecatedIcon =
-          field.deprecationReason != null ? TEXT('{D}') : '';
+    const derivedTypes = mapDerivedTypes<string>(
+      schema,
+      type,
+      (id, derivedType) => {
+        edges.push({
+          tail: type.name,
+          head: derivedType.name,
+          attributes: {
+            tailport: derivedType.name,
+            id: `${id} => ${typeObjToId(derivedType)}`,
+            style: 'dotted',
+          },
+        });
         return `
           <TR>
-            <TD ${HtmlId(id)} ALIGN="LEFT" PORT="${field.name}">
-              <TABLE CELLPADDING="0" CELLSPACING="0" BORDER="0">
-                <TR>
-                  <TD ALIGN="LEFT">${field.name}<FONT>  </FONT></TD>
-                  <TD ALIGN="RIGHT">${deprecatedIcon}${relayIcon}${parts[0]}${
-                    namedType.name
-                  }${parts[1]}</TD>
-                </TR>
-              </TABLE>
-            </TD>
+            <TD ${HtmlId(id)} ALIGN="LEFT" PORT="${derivedType.name}">${derivedType.name}</TD>
           </TR>
         `;
-      });
-    }
+      },
+    ).join('');
 
-    function possibleTypes() {
-      const possibleTypes = forEachPossibleTypes(
-        (id, { name }) => `
+    const htmlID = HtmlId('TYPE_TITLE::' + type.name);
+    const kindLabel = isObjectType(type)
+      ? ''
+      : '&lt;&lt;' + typeToKind(type).toLowerCase() + '&gt;&gt;';
+
+    const html = `
+      <TABLE ALIGN="LEFT" BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="5">
         <TR>
-          <TD ${HtmlId(id)} ALIGN="LEFT" PORT="${name}">${name}</TD>
+          <TD CELLPADDING="4" ${htmlID}><FONT POINT-SIZE="18">${type.name}</FONT><BR/>${kindLabel}</TD>
         </TR>
-      `,
-      );
+        ${fields}
+        ${possibleTypes !== '' ? '<TR><TD>possible types</TD></TR>\n' + possibleTypes : ''}
+        ${derivedTypes !== '' ? '<TR><TD>implementations</TD></TR>\n' + derivedTypes : ''}
+      </TABLE>
+    `;
+    nodes.push({
+      name: type.name,
+      attributes: {
+        id: typeObjToId(type),
+        label: { html },
+      },
+    });
+  }
 
-      if (possibleTypes === '') {
-        return '';
-      }
+  return {
+    directed: true,
+    graphAttributes: {
+      rankdir: 'LR',
+      ranksep: 2.0,
+    },
+    nodeAttributes: {
+      fontsize: '16',
+      fontname: 'helvetica',
+      shape: 'plaintext',
+    },
+    nodes,
+    edges,
+  };
 
-      return `
-        <TR>
-          <TD>possible types</TD>
-        </TR>
-        ${possibleTypes}
-      `;
-    }
+  function isNode(type: GraphQLNamedType): boolean {
+    return typeGraph.nodes.has(type.name);
+  }
 
-    function derivedTypes() {
-      const implementations = forEachDerivedTypes(
-        (id, { name }) => `
-          <TR>
-            <TD ${HtmlId(id)} ALIGN="LEFT" PORT="${name}">${name}</TD>
-          </TR>
-        `,
-      );
-
-      if (implementations === '') {
-        return '';
-      }
-
-      return `
-        <TR>
-          <TD>implementations</TD>
-        </TR>
-        ${implementations}
-      `;
-    }
-
-    function forEachField(
-      stringify: (id: string, field: GraphQLField<any, any>) => string | null,
-    ): string {
-      return mapFields(node, stringify).join('\n');
-    }
-
-    function forEachPossibleTypes(
-      stringify: (id: string, type: GraphQLObjectType) => string | null,
-    ): string {
-      return mapPossibleTypes(node, stringify).join('\n');
-    }
-
-    function forEachDerivedTypes(
-      stringify: (id: string, type: GraphQLNamedType) => string | null,
-    ) {
-      return mapDerivedTypes(schema, node, stringify).join('\n');
-    }
+  function fieldLabel(id: string, field: GraphQLField<any, any>): string {
+    const namedType = getNamedType(field.type);
+    const parts = stringifyTypeWrappers(field.type).map(TEXT);
+    const relayIcon = field.extensions.isRelayField ? TEXT('{R}') : '';
+    const deprecatedIcon = field.deprecationReason != null ? TEXT('{D}') : '';
+    return `
+      <TR>
+        <TD ${HtmlId(id)} ALIGN="LEFT" PORT="${field.name}">
+          <TABLE CELLPADDING="0" CELLSPACING="0" BORDER="0">
+            <TR>
+              <TD ALIGN="LEFT">${field.name}<FONT>  </FONT></TD>
+              <TD ALIGN="RIGHT">${deprecatedIcon}${relayIcon}${parts[0]}${
+                namedType.name
+              }${parts[1]}</TD>
+            </TR>
+          </TABLE>
+        </TD>
+      </TR>
+    `;
   }
 }
 

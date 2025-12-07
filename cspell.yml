@@ -20,6 +20,7 @@ overrides:
       - requestfailed
 
 words:
+  - tailport
   - dotviz
   - graphviz
   - svgr
