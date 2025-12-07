@@ -1,6 +1,7 @@
 import svgPanZoom from 'svg-pan-zoom';
 
-import { typeNameToId } from '../introspection/utils.ts';
+import { GraphSelection } from '../components/Voyager.tsx';
+import { extractTypeName, typeNameToId } from '../introspection/utils.ts';
 import { stringToSvg } from '../utils/dom-helpers.ts';
 
 // FIXME: we are waiting for this [PR](https://github.com/ariutta/svg-pan-zoom/pull/379), after that this two interfaces might be removed in favor to `import { Instance, Point } from 'svg-pan-zoom'`
@@ -22,8 +23,7 @@ interface Instance {
 }
 
 export class Viewport {
-  onSelectNode: (id: string | null) => void;
-  onSelectEdge: (id: string) => void;
+  onSelect: (selection: GraphSelection) => void;
 
   $svg: SVGSVGElement;
   // @ts-expect-error FIXME: Consider for future fix
@@ -39,11 +39,9 @@ export class Viewport {
   constructor(
     svgString: string,
     public container: HTMLElement,
-    onSelectNode: (id: string | null) => void,
-    onSelectEdge: (id: string) => void,
+    onSelect: (selection: GraphSelection) => void,
   ) {
-    this.onSelectNode = onSelectNode;
-    this.onSelectEdge = onSelectEdge;
+    this.onSelect = onSelect;
 
     this.container.innerHTML = '';
     this.$svg = stringToSvg(svgString);
@@ -98,12 +96,16 @@ export class Viewport {
         this.focusElement(typeId);
       } else if (isNode(target)) {
         const $node = getParent(target, 'node')!;
-        this.onSelectNode($node.id);
+        this.onSelect({ typeID: $node.id, edgeID: null });
       } else if (isEdge(target)) {
         const $edge = getParent(target, 'edge')!;
-        this.onSelectEdge(edgeSource($edge).id);
+        const edgeID = edgeSource($edge).id;
+        this.onSelect({
+          typeID: typeNameToId(extractTypeName(edgeID)),
+          edgeID,
+        });
       } else if (!isControl(target)) {
-        this.onSelectNode(null);
+        this.onSelect({ typeID: null, edgeID: null });
       }
     });
   }

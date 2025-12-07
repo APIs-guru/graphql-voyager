@@ -10,6 +10,7 @@ import ZoomInIcon from './icons/zoom-in.svg';
 import ZoomOutIcon from './icons/zoom-out.svg';
 import ZoomResetIcon from './icons/zoom-reset.svg';
 import LoadingAnimation from './utils/LoadingAnimation.tsx';
+import { GraphSelection } from './Voyager.tsx';
 
 interface GraphViewportProps {
   typeGraph: TypeGraph | null;
@@ -17,8 +18,7 @@ interface GraphViewportProps {
   selectedTypeID: string | null;
   selectedEdgeID: string | null;
 
-  onSelectNode: (id: string | null) => void;
-  onSelectEdge: (id: string) => void;
+  onSelect: (selection: GraphSelection) => void;
 }
 
 interface GraphViewportState {
@@ -93,7 +93,7 @@ export default class GraphViewport extends Component<
 
     this._currentTypeGraph = typeGraph;
 
-    const { onSelectNode, onSelectEdge } = this.props;
+    const { onSelect } = this.props;
     renderSvg(typeGraph)
       .then((svg) => {
         if (typeGraph !== this._currentTypeGraph) {
@@ -104,8 +104,7 @@ export default class GraphViewport extends Component<
         const svgViewport = new Viewport(
           svg,
           this._containerRef.current!,
-          onSelectNode,
-          onSelectEdge,
+          onSelect,
         );
         this.setState({ svgViewport });
       })
