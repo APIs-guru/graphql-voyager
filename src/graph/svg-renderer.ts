@@ -11,7 +11,10 @@ const vizWorker = new VizWorker();
 
 export async function renderSvg(typeGraph: TypeGraph) {
   const dot = getDot(typeGraph);
-  const rawSVG = await vizWorker.renderString(dot);
+  const rawSVG = await vizWorker.render({
+    input: dot,
+    options: { engine: 'dot', format: 'svg' },
+  });
   const svg = preprocessVizSVG(rawSVG);
   return svg;
 }
