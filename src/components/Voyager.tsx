@@ -19,7 +19,6 @@ import {
 
 import { getTypeGraph } from '../graph/type-graph.ts';
 import { getSchema } from '../introspection/introspection.ts';
-import { extractTypeName, typeNameToId } from '../introspection/utils.ts';
 import { MaybePromise, usePromise } from '../utils/usePromise.ts';
 import DocExplorer from './doc-explorer/DocExplorer.tsx';
 import GraphViewport from './GraphViewport.tsx';
@@ -51,6 +50,10 @@ export interface VoyagerProps {
 
   children?: ReactNode;
 }
+
+export type GraphSelection =
+  | { typeID: null; edgeID: null }
+  | { typeID: string; edgeID: string | null };
 
 export default function Voyager(props: VoyagerProps) {
   const initialDisplayOptions = useMemo(
@@ -106,10 +109,7 @@ export default function Voyager(props: VoyagerProps) {
     setSelected({ typeID: null, edgeID: null });
   }, [typeGraph]);
 
-  const [selected, setSelected] = useState<{
-    typeID: string | null;
-    edgeID: string | null;
-  }>({
+  const [selected, setSelected] = useState<GraphSelection>({
     typeID: null,
     edgeID: null,
   });
@@ -165,8 +165,7 @@ export default function Voyager(props: VoyagerProps) {
             selectedTypeID={selected.typeID}
             selectedEdgeID={selected.edgeID}
             onFocusNode={(id) => viewportRef.current?.focusNode(id)}
-            onSelectNode={handleSelectNode}
-            onSelectEdge={handleSelectEdge}
+            onSelect={handleSelect}
           />
           <PoweredBy />
         </div>
@@ -220,31 +219,19 @@ export default function Voyager(props: VoyagerProps) {
           typeGraph={typeGraph}
           selectedTypeID={selected.typeID}
           selectedEdgeID={selected.edgeID}
-          onSelectNode={handleSelectNode}
-          onSelectEdge={handleSelectEdge}
+          onSelect={handleSelect}
           ref={viewportRef}
         />
       </Box>
     );
   }
 
-  function handleSelectNode(typeID: string | null) {
-    setSelected((oldSelected) => {
-      if (typeID === oldSelected.typeID) {
-        return oldSelected;
+  function handleSelect(newSel: GraphSelection) {
+    setSelected((oldSel) => {
+      if (newSel.typeID === oldSel.typeID && newSel.edgeID === oldSel.edgeID) {
+        return { typeID: newSel.typeID, edgeID: null }; // deselect if click again
       }
-      return { typeID, edgeID: null };
-    });
-  }
-
-  function handleSelectEdge(edgeID: string | null) {
-    setSelected((oldSelected) => {
-      if (edgeID === oldSelected.edgeID || edgeID == null) {
-        // deselect if click again
-        return { ...oldSelected, edgeID: null };
-      } else {
-        return { typeID: typeNameToId(extractTypeName(edgeID)), edgeID };
-      }
+      return newSel;
     });
   }
 }
