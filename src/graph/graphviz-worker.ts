@@ -91,11 +91,11 @@ export class VizWorker {
         console.timeEnd('graphql-voyager: Rendering SVG');
         if (result.errors.length !== 0) {
           return reject(
-            AggregateError([
+            new AggregateError(
               result.errors.map(
                 (error) => new Error(`${error.level} : ${error.message}`),
               ),
-            ]),
+            ),
           );
         }
         if (result.status === 'success') {
