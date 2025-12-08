@@ -1,7 +1,6 @@
 import svgPanZoom from 'svg-pan-zoom';
 
-import { GraphSelection } from '../components/Voyager.tsx';
-import { extractTypeName, typeNameToId } from '../introspection/utils.ts';
+import { typeNameToId } from '../introspection/utils.ts';
 import { stringToSvg } from '../utils/dom-helpers.ts';
 
 // FIXME: we are waiting for this [PR](https://github.com/ariutta/svg-pan-zoom/pull/379), after that this two interfaces might be removed in favor to `import { Instance, Point } from 'svg-pan-zoom'`
@@ -23,8 +22,6 @@ interface Instance {
 }
 
 export class Viewport {
-  onSelect: (selection: GraphSelection) => void;
-
   $svg: SVGSVGElement;
   // @ts-expect-error FIXME: Consider for future fix
   zoomer: Instance;
@@ -39,10 +36,9 @@ export class Viewport {
   constructor(
     svgString: string,
     public container: HTMLElement,
-    onSelect: (selection: GraphSelection) => void,
+    public onSelectNode: (id: string | null) => void,
+    public onSelectEdge: (fromID: string, toID: string) => void,
   ) {
-    this.onSelect = onSelect;
-
     this.container.innerHTML = '';
     this.$svg = stringToSvg(svgString);
     this.container.appendChild(this.$svg);
@@ -96,16 +92,12 @@ export class Viewport {
         this.focusElement(typeId);
       } else if (isNode(target)) {
         const $node = getParent(target, 'node')!;
-        this.onSelect({ typeID: $node.id, edgeID: null });
+        this.onSelectNode($node.id);
       } else if (isEdge(target)) {
         const $edge = getParent(target, 'edge')!;
-        const edgeID = edgeSource($edge).id;
-        this.onSelect({
-          typeID: typeNameToId(extractTypeName(edgeID)),
-          edgeID,
-        });
+        this.onSelectEdge(edgeSource($edge).id, edgeTarget($edge).id);
       } else if (!isControl(target)) {
-        this.onSelect({ typeID: null, edgeID: null });
+        this.onSelectNode(null);
       }
     });
   }
@@ -166,12 +158,12 @@ export class Viewport {
     }
   }
 
-  selectEdgeById(id: string | null) {
+  selectEdgeById(id: string | null | undefined) {
     this.removeClass('.edge.selected', 'selected');
     this.removeClass('.edge-source.selected', 'selected');
     this.removeClass('.field.selected', 'selected');
 
-    if (id === null) return;
+    if (id == null) return;
 
     const $selected = document.getElementById(id);
     if ($selected) {

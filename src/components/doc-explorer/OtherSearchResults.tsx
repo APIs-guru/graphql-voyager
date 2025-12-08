@@ -1,4 +1,4 @@
-import { GraphQLNamedType } from 'graphql/type';
+import { getNamedType, GraphQLNamedType } from 'graphql/type';
 
 import { TypeGraph } from '../../graph/type-graph.ts';
 import { mapFields } from '../../introspection/utils.ts';
@@ -8,13 +8,21 @@ import { isMatch } from '../../utils/is-match.ts';
 interface OtherSearchResultsProps {
   typeGraph: TypeGraph;
   withinType: GraphQLNamedType | null;
-  searchValue: string;
+  searchValue: string | null;
   onTypeLink: (type: GraphQLNamedType) => void;
-  onFieldLink: (type: GraphQLNamedType, fieldID: string) => void;
+  onFieldLink: (
+    fieldID: string,
+    parent: GraphQLNamedType,
+    fieldType: GraphQLNamedType,
+  ) => void;
 }
 
 export default function OtherSearchResults(props: OtherSearchResultsProps) {
   const { typeGraph, withinType, searchValue, onTypeLink, onFieldLink } = props;
+
+  if (searchValue == null) {
+    return null;
+  }
 
   const types = Array.from(typeGraph.nodes.values()).filter(
     (type) => type !== withinType,
@@ -59,7 +67,7 @@ export default function OtherSearchResults(props: OtherSearchResultsProps) {
           <div
             className="item"
             key={fieldID}
-            onClick={() => onFieldLink(type, fieldID)}
+            onClick={() => onFieldLink(fieldID, type, getNamedType(field.type))}
           >
             <span className="type-name">{type.name}</span>
             <span className="field-name">
