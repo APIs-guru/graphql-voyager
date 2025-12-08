@@ -6,18 +6,19 @@ import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
 import { ThemeProvider } from '@mui/material/styles';
 import { ExecutionResult } from 'graphql/execution';
-import { GraphQLSchema } from 'graphql/type';
+import { GraphQLNamedType, GraphQLSchema } from 'graphql/type';
 import { buildClientSchema, IntrospectionQuery } from 'graphql/utilities';
 import {
   Children,
   type ReactNode,
+  useCallback,
   useEffect,
   useMemo,
   useRef,
   useState,
 } from 'react';
 
-import { getTypeGraph } from '../graph/type-graph.ts';
+import { getTypeGraph, TypeGraph } from '../graph/type-graph.ts';
 import { getSchema } from '../introspection/introspection.ts';
 import { MaybePromise, usePromise } from '../utils/usePromise.ts';
 import DocExplorer from './doc-explorer/DocExplorer.tsx';
@@ -51,9 +52,23 @@ export interface VoyagerProps {
   children?: ReactNode;
 }
 
-export type GraphSelection =
-  | { typeID: null; edgeID: null }
-  | { typeID: string; edgeID: string | null };
+interface NavStackTypeList {
+  prev: null;
+  typeGraph: TypeGraph;
+  type: null;
+  selectedEdgeID: null;
+  searchValue: string;
+}
+
+interface NavStackType {
+  prev: NavStack;
+  typeGraph: TypeGraph;
+  type: GraphQLNamedType;
+  selectedEdgeID: string | null;
+  searchValue: string;
+}
+
+export type NavStack = NavStackTypeList | NavStackType;
 
 export default function Voyager(props: VoyagerProps) {
   const initialDisplayOptions = useMemo(
@@ -81,10 +96,10 @@ export default function Voyager(props: VoyagerProps) {
     setDisplayOptions(initialDisplayOptions);
   }, [introspectionResult, initialDisplayOptions]);
 
-  const typeGraph = useMemo(() => {
+  const [navStack, setNavStack] = useState<NavStack | null>(null);
+  useEffect(() => {
     if (introspectionResult.loading || introspectionResult.value == null) {
-      // FIXME: display introspectionResult.error
-      return null;
+      return; // FIXME: display introspectionResult.error
     }
 
     let introspectionSchema;
@@ -95,24 +110,22 @@ export default function Voyager(props: VoyagerProps) {
         introspectionResult.value.errors != null ||
         introspectionResult.value.data == null
       ) {
-        // FIXME: display errors
-        return null;
+        return; // FIXME: display errors
       }
       introspectionSchema = buildClientSchema(introspectionResult.value.data);
     }
 
     const schema = getSchema(introspectionSchema, displayOptions);
-    return getTypeGraph(schema, displayOptions);
+    const typeGraph = getTypeGraph(schema, displayOptions);
+
+    setNavStack(() => ({
+      prev: null,
+      typeGraph,
+      type: null,
+      selectedEdgeID: null,
+      searchValue: '',
+    }));
   }, [introspectionResult, displayOptions]);
-
-  useEffect(() => {
-    setSelected({ typeID: null, edgeID: null });
-  }, [typeGraph]);
-
-  const [selected, setSelected] = useState<GraphSelection>({
-    typeID: null,
-    edgeID: null,
-  });
 
   const {
     allowToChangeSchema = false,
@@ -123,6 +136,70 @@ export default function Voyager(props: VoyagerProps) {
   } = props;
 
   const viewportRef = useRef<GraphViewport>(null);
+
+  const handleNavigationBack = useCallback(() => {
+    setNavStack((old) => {
+      if (old?.prev == null) {
+        return old;
+      }
+      return old.prev;
+    });
+  }, []);
+
+  const handleSearch = useCallback((searchValue: string) => {
+    setNavStack((old) => {
+      if (old == null) {
+        return old;
+      }
+      return { ...old, searchValue };
+    });
+  }, []);
+
+  const handleSelectNode = useCallback((type: GraphQLNamedType | null) => {
+    setNavStack((old) => {
+      if (old == null) {
+        return old;
+      }
+      if (type == null) {
+        let first = old;
+        while (first.prev != null) {
+          first = first.prev;
+        }
+        return first;
+      }
+      return {
+        prev: old,
+        typeGraph: old.typeGraph,
+        type,
+        selectedEdgeID: null,
+        searchValue: '',
+      };
+    });
+  }, []);
+
+  const handleSelectEdge = useCallback(
+    (edgeID: string, fromType: GraphQLNamedType, _toType: GraphQLNamedType) => {
+      setNavStack((old) => {
+        if (old == null) {
+          return old;
+        }
+        if (fromType === old.type) {
+          // deselect if click again
+          return edgeID === old.selectedEdgeID
+            ? { ...old, selectedEdgeID: null }
+            : { ...old, selectedEdgeID: edgeID };
+        }
+        return {
+          prev: old,
+          typeGraph: old.typeGraph,
+          type: fromType,
+          selectedEdgeID: edgeID,
+          searchValue: '',
+        };
+      });
+    },
+    [],
+  );
 
   return (
     <ThemeProvider theme={theme}>
@@ -161,11 +238,12 @@ export default function Voyager(props: VoyagerProps) {
           {allowToChangeSchema && renderChangeSchemaButton()}
           {panelHeader}
           <DocExplorer
-            typeGraph={typeGraph}
-            selectedTypeID={selected.typeID}
-            selectedEdgeID={selected.edgeID}
-            onFocusNode={(id) => viewportRef.current?.focusNode(id)}
-            onSelect={handleSelect}
+            navStack={navStack}
+            onNavigationBack={handleNavigationBack}
+            onSearch={handleSearch}
+            onFocusNode={(type) => viewportRef.current?.focusNode(type)}
+            onSelectNode={handleSelectNode}
+            onSelectEdge={handleSelectEdge}
           />
           <PoweredBy />
         </div>
@@ -209,30 +287,20 @@ export default function Voyager(props: VoyagerProps) {
         {!hideSettings && (
           <Settings
             options={displayOptions}
-            typeGraph={typeGraph}
+            typeGraph={navStack?.typeGraph}
             onChange={(options) =>
               setDisplayOptions((oldOptions) => ({ ...oldOptions, ...options }))
             }
           />
         )}
         <GraphViewport
-          typeGraph={typeGraph}
-          selectedTypeID={selected.typeID}
-          selectedEdgeID={selected.edgeID}
-          onSelect={handleSelect}
+          navStack={navStack}
+          onSelectNode={handleSelectNode}
+          onSelectEdge={handleSelectEdge}
           ref={viewportRef}
         />
       </Box>
     );
-  }
-
-  function handleSelect(newSel: GraphSelection) {
-    setSelected((oldSel) => {
-      if (newSel.typeID === oldSel.typeID && newSel.edgeID === oldSel.edgeID) {
-        return { typeID: newSel.typeID, edgeID: null }; // deselect if click again
-      }
-      return newSel;
-    });
   }
 }
 

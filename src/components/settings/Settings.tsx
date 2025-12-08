@@ -6,7 +6,7 @@ import { VoyagerDisplayOptions } from '../Voyager.tsx';
 import RootSelector from './RootSelector.tsx';
 
 interface SettingsProps {
-  typeGraph: TypeGraph | null;
+  typeGraph: TypeGraph | null | undefined;
   options: VoyagerDisplayOptions;
   onChange: (options: VoyagerDisplayOptions) => void;
 }
