@@ -1,5 +1,5 @@
-export function isMatch(sourceText: string, searchValue: string | null) {
-  if (!searchValue) {
+export function isMatch(sourceText: string, searchValue: string) {
+  if (searchValue === '') {
     return true;
   }
 

@@ -10,7 +10,7 @@ import TypeLink from './TypeLink.tsx';
 
 interface TypeListProps {
   typeGraph: TypeGraph;
-  filter: string | null;
+  filter: string;
   onFocusType: (type: GraphQLNamedType) => void;
   onTypeLink: (type: GraphQLNamedType) => void;
 }

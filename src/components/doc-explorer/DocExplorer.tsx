@@ -1,16 +1,10 @@
 import './DocExplorer.css';
 
-import { assertCompositeType, GraphQLNamedType } from 'graphql/type';
+import { type GraphQLNamedType } from 'graphql/type';
 import { useCallback, useEffect, useState } from 'react';
 
-import { isNode, TypeGraph } from '../../graph/type-graph.ts';
-import {
-  extractTypeName,
-  typeNameToId,
-  typeObjToId,
-} from '../../introspection/utils.ts';
 import SearchBox from '../utils/SearchBox.tsx';
-import type { GraphSelection } from '../Voyager.tsx';
+import { type NavStack } from '../Voyager.tsx';
 import FocusTypeButton from './FocusTypeButton.tsx';
 import OtherSearchResults from './OtherSearchResults.tsx';
 import TypeDoc from './TypeDoc.tsx';
@@ -18,115 +12,65 @@ import TypeInfoPopover from './TypeInfoPopover.tsx';
 import TypeList from './TypeList.tsx';
 
 interface DocExplorerProps {
-  typeGraph: TypeGraph | null;
-  selectedTypeID: string | null;
-  selectedEdgeID: string | null;
-
-  onFocusNode: (id: string) => void;
-  onSelect: (selection: GraphSelection) => void;
+  navStack: NavStack | null;
+  onNavigationBack: () => void;
+  onSearch: (searchValue: string) => void;
+  onFocusNode: (type: GraphQLNamedType) => void;
+  onSelectNode: (type: GraphQLNamedType | null) => void;
+  onSelectEdge: (
+    edgeID: string,
+    fromType: GraphQLNamedType,
+    toType: GraphQLNamedType,
+  ) => void;
 }
 
-interface NavStackItem {
-  title: string;
-  type: GraphQLNamedType | null;
-  searchValue: string | null;
-}
+const TYPE_LIST = 'Type List';
 
 export default function DocExplorer(props: DocExplorerProps) {
-  const { typeGraph, selectedTypeID, selectedEdgeID, onFocusNode, onSelect } =
-    props;
-  const [navStack, setNavStack] = useState<ReadonlyArray<NavStackItem>>([]);
-  useEffect(() => {
-    setNavStack((prev) => {
-      if (typeGraph == null) {
-        return [];
-      }
-
-      const last = prev.at(-1);
-      if (last == null || selectedTypeID == null) {
-        return [{ title: 'Type List', type: null, searchValue: null }];
-      }
-
-      // FIXME: hack to prevent crash
-      const maybeType = typeGraph.nodes.get(extractTypeName(selectedTypeID));
-      if (maybeType == null) {
-        return [];
-      }
-
-      const selectedType = assertCompositeType(maybeType);
-      if (selectedType === last.type) {
-        return prev;
-      }
-
-      return [
-        ...prev,
-        {
-          title: selectedType.name,
-          type: selectedType,
-          searchValue: null,
-        },
-      ];
-    });
-  }, [typeGraph, selectedTypeID]);
+  const {
+    navStack,
+    onNavigationBack,
+    onSearch,
+    onFocusNode,
+    onSelectNode,
+    onSelectEdge,
+  } = props;
 
   const [typeForInfoPopover, setTypeForInfoPopover] =
     useState<GraphQLNamedType | null>(null);
-  useEffect(() => setTypeForInfoPopover(null), [navStack, selectedEdgeID]);
+  useEffect(() => setTypeForInfoPopover(null), [navStack]);
 
   const handleTypeLink = useCallback(
     (type: GraphQLNamedType) => {
-      if (isNode(type)) {
-        const id = typeObjToId(type);
-        onFocusNode(id);
-        onSelect({ typeID: id, edgeID: null });
+      if (navStack?.typeGraph.nodes.has(type.name)) {
+        onFocusNode(type);
+        onSelectNode(type);
       } else {
         setTypeForInfoPopover(type);
       }
     },
-    [onFocusNode, onSelect],
+    [navStack, onFocusNode, onSelectNode, setTypeForInfoPopover],
   );
 
-  const handleFieldLink = useCallback(
-    (type: GraphQLNamedType, fieldID: string) => {
-      const id = typeObjToId(type);
-      onFocusNode(id);
-      onSelect({ typeID: id, edgeID: fieldID });
+  const handleSelectEdge = useCallback(
+    (fieldID: string, fromType: GraphQLNamedType, toType: GraphQLNamedType) => {
+      if (fromType !== navStack?.type) {
+        onFocusNode(fromType);
+      }
+      onSelectEdge(fieldID, fromType, toType);
     },
-    [onFocusNode, onSelect],
+    [navStack, onFocusNode, onSelectEdge],
   );
 
-  const handleNavBackClick = useCallback(() => {
-    const newSelectedType = navStack.at(-2)?.type;
-
-    setNavStack((prev) => prev.slice(0, -1));
-    if (newSelectedType == null) {
-      onSelect({ typeID: null, edgeID: null });
-    } else {
-      const id = typeObjToId(newSelectedType);
-      onFocusNode(id);
-      onSelect({ typeID: id, edgeID: null });
+  const handleNavBack = useCallback(() => {
+    const previousType = navStack?.prev?.type;
+    if (previousType != null) {
+      onFocusNode(previousType);
     }
-  }, [navStack, onFocusNode, onSelect]);
+    onNavigationBack();
+  }, [navStack, onNavigationBack, onFocusNode]);
 
-  const onSelectEdge = useCallback(
-    (edgeID: string) =>
-      onSelect({ typeID: typeNameToId(extractTypeName(edgeID)), edgeID }),
-    [onSelect],
-  );
-
-  const handleSearch = useCallback((value: string) => {
-    setNavStack((prev) => {
-      const last = prev.at(-1);
-      return last == null
-        ? prev
-        : [...prev.slice(0, -1), { ...last, searchValue: value }];
-    });
-  }, []);
-
-  const previousNav = navStack.at(-2);
-  const currentNav = navStack.at(-1);
-
-  if (typeGraph == null || currentNav == null) {
+  if (navStack == null) {
     return (
       <div className="type-doc" key={0}>
         <span className="loading"> Loading... </span>
@@ -134,84 +78,60 @@ export default function DocExplorer(props: DocExplorerProps) {
     );
   }
 
-  const name = currentNav.type ? currentNav.type.name : 'Schema';
-
   return (
-    <div className="type-doc" key={navStack.length}>
-      {renderNavigation(previousNav, currentNav)}
+    <div className="type-doc">
+      {navStack.prev == null ? (
+        <div className="doc-navigation">
+          <span className="header">{TYPE_LIST}</span>
+        </div>
+      ) : (
+        <div className="doc-navigation">
+          <span className="back" onClick={handleNavBack}>
+            {navStack.prev.type?.name ?? TYPE_LIST}
+          </span>
+          <span className="active" title={navStack.type.name}>
+            {navStack.type.name}
+            <FocusTypeButton onClick={() => onFocusNode(navStack.type)} />
+          </span>
+        </div>
+      )}
       <SearchBox
-        placeholder={`Search ${name}...`}
-        value={currentNav.searchValue}
-        onSearch={handleSearch}
+        placeholder={`Search ${navStack.type?.name ?? 'Schema'}...`}
+        value={navStack.searchValue}
+        onSearch={onSearch}
       />
       <div className="scroll-area">
-        {renderCurrentNav(typeGraph, currentNav)}
-        {currentNav.searchValue && (
-          <OtherSearchResults
-            typeGraph={typeGraph}
-            withinType={currentNav.type}
-            searchValue={currentNav.searchValue}
+        {navStack.type == null ? (
+          <TypeList
+            typeGraph={navStack.typeGraph}
+            filter={navStack.searchValue}
             onTypeLink={handleTypeLink}
-            onFieldLink={handleFieldLink}
+            onFocusType={onFocusNode}
+          />
+        ) : (
+          <TypeDoc
+            selectedType={navStack.type}
+            selectedEdgeID={navStack.selectedEdgeID}
+            typeGraph={navStack.typeGraph}
+            filter={navStack.searchValue}
+            onTypeLink={handleTypeLink}
+            onSelectEdge={handleSelectEdge}
           />
         )}
+        <OtherSearchResults
+          typeGraph={navStack.typeGraph}
+          withinType={navStack.type}
+          searchValue={navStack.searchValue}
+          onTypeLink={handleTypeLink}
+          onFieldLink={handleSelectEdge}
+        />
       </div>
       {typeForInfoPopover && (
         <TypeInfoPopover
           type={typeForInfoPopover}
-          onChange={(type) => setTypeForInfoPopover(type)}
+          onChange={setTypeForInfoPopover}
         />
       )}
     </div>
   );
-
-  function renderCurrentNav(typeGraph: TypeGraph, current: NavStackItem) {
-    if (current.type) {
-      return (
-        <TypeDoc
-          selectedType={current.type}
-          selectedEdgeID={selectedEdgeID}
-          typeGraph={typeGraph}
-          filter={current.searchValue}
-          onTypeLink={handleTypeLink}
-          onSelectEdge={onSelectEdge}
-        />
-      );
-    }
-
-    return (
-      <TypeList
-        typeGraph={typeGraph}
-        filter={current.searchValue}
-        onTypeLink={handleTypeLink}
-        onFocusType={(type) => onFocusNode(typeObjToId(type))}
-      />
-    );
-  }
-
-  function renderNavigation(
-    prev: NavStackItem | undefined,
-    current: NavStackItem,
-  ) {
-    const { title, type } = current;
-
-    if (prev == null || type == null) {
-      return (
-        <div className="doc-navigation">
-          <span className="header">{title}</span>
-        </div>
-      );
-    }
-    return (
-      <div className="doc-navigation">
-        <span className="back" onClick={handleNavBackClick}>
-          {prev.title}
-        </span>
-        <span className="active" title={title}>
-          {title}
-          <FocusTypeButton onClick={() => onFocusNode(typeObjToId(type))} />
-        </span>
-      </div>
-    );
-  }
 }

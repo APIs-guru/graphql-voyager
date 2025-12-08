@@ -111,7 +111,6 @@ const config: Array<webpack.Configuration> = [
   {
     ...baseConfig,
     entry: './src/standalone.ts',
-    optimization: { minimize: true },
     externals: undefined,
     output: {
       ...baseConfig.output,

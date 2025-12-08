@@ -29,7 +29,7 @@ export default function WrappedTypeName(props: WrappedTypeNameProps) {
     <span className="wrapped-type-name">
       <>
         {leftWrap}
-        <TypeLink type={type} onClick={onTypeLink} />
+        <TypeLink type={type} onClick={onTypeLink} filter="" />
         {rightWrap} {container.extensions.isRelayField && wrapRelayIcon()}
       </>
     </span>

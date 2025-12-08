@@ -7,32 +7,34 @@ import { useEffect, useState } from 'react';
 
 interface SearchBoxProps {
   placeholder: string;
-  value: string | null;
+  value: string;
   onSearch: (value: string) => void;
 }
 
 export default function SearchBox(props: SearchBoxProps) {
-  const [value, setValue] = useState(props.value ?? '');
-  const { placeholder, onSearch } = props;
+  const { placeholder, onSearch, value } = props;
+  const [localValue, setLocalValue] = useState(value);
 
+  useEffect(() => setLocalValue(value), [value]);
   useEffect(() => {
-    const timeout = setTimeout(() => onSearch(value), 200);
+    if (localValue === value) return;
+    const timeout = setTimeout(() => onSearch(localValue), 200);
     return () => clearTimeout(timeout);
-  }, [onSearch, value]);
+  }, [onSearch, value, localValue]);
 
   return (
     <Box paddingLeft={2} paddingRight={2}>
       <Input
         fullWidth
         placeholder={placeholder}
-        value={value}
-        onChange={(event) => setValue(event.target.value)}
+        value={localValue}
+        onChange={(event) => setLocalValue(event.target.value)}
         type="text"
         endAdornment={
-          value && (
+          localValue && (
             <InputAdornment position="end">
-              <IconButton onClick={() => setValue('')}>
-                <CloseIcon fontSize="small" opacity={0.8} />
+              <IconButton onClick={() => setLocalValue('')}>
+                <CloseIcon fontSize="small" sx={{ opacity: 0.8 }} />
               </IconButton>
             </InputAdornment>
           )

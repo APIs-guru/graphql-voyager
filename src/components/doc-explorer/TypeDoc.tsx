@@ -1,6 +1,6 @@
 import './TypeDoc.css';
 
-import { GraphQLField, GraphQLNamedType } from 'graphql/type';
+import { getNamedType, GraphQLField, GraphQLNamedType } from 'graphql/type';
 import React, { Component, ReactElement } from 'react';
 
 import { TypeGraph } from '../../graph/type-graph.ts';
@@ -22,8 +22,12 @@ interface TypeDocProps {
   selectedType: GraphQLNamedType;
   selectedEdgeID: string | null;
   typeGraph: TypeGraph;
-  filter: string | null;
-  onSelectEdge: (id: string) => void;
+  filter: string;
+  onSelectEdge: (
+    edgeID: string,
+    fromType: GraphQLNamedType,
+    toType: GraphQLNamedType,
+  ) => void;
   onTypeLink: (type: GraphQLNamedType) => void;
 }
 
@@ -99,7 +103,7 @@ export default class TypeDoc extends Component<TypeDocProps> {
         <div
           key={type.name}
           className={className}
-          onClick={() => onSelectEdge(id)}
+          onClick={() => onSelectEdge(id, selectedType, type)}
           ref={isSelected ? selectedItemRef : undefined}
         >
           <TypeLink type={type} onClick={onTypeLink} filter={filter} />
@@ -131,7 +135,9 @@ export default class TypeDoc extends Component<TypeDocProps> {
         <div
           key={field.name}
           className={className}
-          onClick={() => onSelectEdge(fieldID)}
+          onClick={() =>
+            onSelectEdge(fieldID, selectedType, getNamedType(field.type))
+          }
           ref={isSelected ? selectedItemRef : undefined}
         >
           <a className="field-name">{highlightTerm(field.name, filter)}</a>
