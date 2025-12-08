@@ -1,28 +1,31 @@
 import Box from '@mui/material/Box';
 import IconButton from '@mui/material/IconButton';
 import Stack from '@mui/material/Stack';
+import { GraphQLNamedType } from 'graphql';
 import { Component, createRef } from 'react';
 
 import { renderSvg } from '../graph/svg-renderer.ts';
 import { TypeGraph } from '../graph/type-graph.ts';
 import { Viewport } from '../graph/viewport.ts';
+import { extractTypeName, typeObjToId } from '../introspection/utils.ts';
 import ZoomInIcon from './icons/zoom-in.svg';
 import ZoomOutIcon from './icons/zoom-out.svg';
 import ZoomResetIcon from './icons/zoom-reset.svg';
 import LoadingAnimation from './utils/LoadingAnimation.tsx';
-import { GraphSelection } from './Voyager.tsx';
+import { type NavStack } from './Voyager.tsx';
 
 interface GraphViewportProps {
-  typeGraph: TypeGraph | null;
-
-  selectedTypeID: string | null;
-  selectedEdgeID: string | null;
-
-  onSelect: (selection: GraphSelection) => void;
+  navStack: NavStack | null;
+  onSelectNode: (type: GraphQLNamedType | null) => void;
+  onSelectEdge: (
+    edgeID: string,
+    fromType: GraphQLNamedType,
+    toType: GraphQLNamedType,
+  ) => void;
 }
 
 interface GraphViewportState {
-  typeGraph: TypeGraph | null;
+  typeGraph: TypeGraph | null | undefined;
   svgViewport: Viewport | null;
 }
 
@@ -41,7 +44,7 @@ export default class GraphViewport extends Component<
     props: GraphViewportProps,
     state: GraphViewportState,
   ): GraphViewportState | null {
-    const { typeGraph } = props;
+    const typeGraph = props.navStack?.typeGraph;
 
     if (typeGraph !== state.typeGraph) {
       return { typeGraph, svgViewport: null };
@@ -51,29 +54,34 @@ export default class GraphViewport extends Component<
   }
 
   componentDidMount() {
-    this._renderSvgAsync(this.props.typeGraph);
+    this._renderSvgAsync(this.props.navStack?.typeGraph);
   }
 
   componentDidUpdate(
     prevProps: GraphViewportProps,
     prevState: GraphViewportState,
   ) {
+    const navStack = this.props.navStack;
+    const prevNavStack = prevProps.navStack;
     const { svgViewport } = this.state;
 
     if (svgViewport == null) {
-      this._renderSvgAsync(this.props.typeGraph);
+      this._renderSvgAsync(navStack?.typeGraph);
       return;
     }
 
     const isJustRendered = prevState.svgViewport == null;
-    const { selectedTypeID, selectedEdgeID } = this.props;
 
-    if (prevProps.selectedTypeID !== selectedTypeID || isJustRendered) {
-      svgViewport.selectNodeById(selectedTypeID);
+    if (prevNavStack?.type !== navStack?.type || isJustRendered) {
+      const nodeId = navStack?.type == null ? null : typeObjToId(navStack.type);
+      svgViewport.selectNodeById(nodeId);
     }
 
-    if (prevProps.selectedEdgeID !== selectedEdgeID || isJustRendered) {
-      svgViewport.selectEdgeById(selectedEdgeID);
+    if (
+      prevNavStack?.selectedEdgeID !== navStack?.selectedEdgeID ||
+      isJustRendered
+    ) {
+      svgViewport.selectEdgeById(navStack?.selectedEdgeID);
     }
   }
 
@@ -82,7 +90,7 @@ export default class GraphViewport extends Component<
     this._cleanupSvgViewport();
   }
 
-  _renderSvgAsync(typeGraph: TypeGraph | null) {
+  _renderSvgAsync(typeGraph: TypeGraph | null | undefined) {
     if (typeGraph == null) {
       return; // Nothing to render
     }
@@ -93,7 +101,7 @@ export default class GraphViewport extends Component<
 
     this._currentTypeGraph = typeGraph;
 
-    const { onSelect } = this.props;
+    const { onSelectNode, onSelectEdge } = this.props;
     renderSvg(typeGraph)
       .then((svg) => {
         if (typeGraph !== this._currentTypeGraph) {
@@ -104,7 +112,22 @@ export default class GraphViewport extends Component<
         const svgViewport = new Viewport(
           svg,
           this._containerRef.current!,
-          onSelect,
+          (nodeId: string | null) => {
+            if (nodeId == null) {
+              return onSelectNode(null);
+            }
+            const type = typeGraph.nodes.get(extractTypeName(nodeId));
+            if (type != null) {
+              onSelectNode(type);
+            }
+          },
+          (edgeID: string, toID: string) => {
+            const fromType = typeGraph.nodes.get(extractTypeName(edgeID));
+            const toType = typeGraph.nodes.get(extractTypeName(toID));
+            if (fromType != null && toType != null) {
+              onSelectEdge(edgeID, fromType, toType);
+            }
+          },
         );
         this.setState({ svgViewport });
       })
@@ -178,10 +201,10 @@ export default class GraphViewport extends Component<
     );
   }
 
-  focusNode(id: string) {
+  focusNode(type: GraphQLNamedType): void {
     const { svgViewport } = this.state;
     if (svgViewport) {
-      svgViewport.focusElement(id);
+      svgViewport.focusElement(typeObjToId(type));
     }
   }
 
