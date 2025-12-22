@@ -64,7 +64,7 @@
     "@mui/lab": "7.0.0-beta.13",
     "@mui/material": "7.1.1",
     "commonmark": "0.31.2",
-    "dotviz": "0.0.6",
+    "dotviz": "0.0.7",
     "svg-pan-zoom": "3.6.2"
   },
   "devDependencies": {
