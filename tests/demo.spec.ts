@@ -1,5 +1,5 @@
-import { expect, test } from '@playwright/test';
 import { buildSchema, graphqlSync } from 'graphql';
+import { expect, test } from 'playwright/test';
 
 import { gotoVoyagerPage, SchemaPresets } from './PageObjectModel.ts';
 

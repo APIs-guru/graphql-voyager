@@ -1,41 +1,11 @@
 services:
-  serve-webpack-example:
-    build:
-      context: .
-      dockerfile: ./example/webpack/Dockerfile
-    stdin_open: true
-    tty: true
-  serve-express-example:
-    build:
-      context: .
-      dockerfile: ./example/express-server/Dockerfile
-    stdin_open: true
-    tty: true
-  test:
-    depends_on:
-      - serve-webpack-example
-      - serve-express-example
+  playwright-server:
     build:
       context: .
       dockerfile: ./tests/Dockerfile
-    volumes:
-      - ./demo-dist:/app/demo-dist:ro
-      - ./playwright.config.ts:/app/playwright.config.ts:ro
-      - ./tests:/app/tests
-      - ./test-results:/app/test-results
-      - ./playwright-report:/app/playwright-report
-    command: npx playwright test
-  update-snapshots:
-    depends_on:
-      - serve-webpack-example
-      - serve-express-example
-    build:
-      context: .
-      dockerfile: ./tests/Dockerfile
-    volumes:
-      - ./demo-dist:/app/demo-dist:ro
-      - ./playwright.config.ts:/app/playwright.config.ts:ro
-      - ./tests:/app/tests
-      - ./test-results:/app/test-results
-      - ./playwright-report:/app/playwright-report
-    command: npx playwright test --update-snapshots
+      args:
+        PLAYWRIGHT_VERSION: ${PLAYWRIGHT_VERSION}
+    ipc: host
+    command: playwright run-server --host=0.0.0.0 --port=3000
+    ports:
+      - '3000:3000'

@@ -1,11 +1,5 @@
 # syntax=docker/dockerfile:1
-
 FROM node:24
 
-WORKDIR /app
-
-COPY ["./package.json", "./package-lock.json", "./"]
-RUN npm ci && npx playwright install --with-deps chromium
-
-COPY ["./tsconfig.json", "./"]
-COPY ["./scripts", "./scripts"]
+ARG PLAYWRIGHT_VERSION="missing PLAYWRIGHT_VERSION arg"
+RUN npm -g install "playwright@$PLAYWRIGHT_VERSION" && playwright install --with-deps chromium
