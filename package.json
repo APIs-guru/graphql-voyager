@@ -7,7 +7,7 @@
   "homepage": "https://apis.guru/graphql-voyager",
   "repository": {
     "type": "git",
-    "url": "https://github.com/APIs-guru/graphql-voyager.git"
+    "url": "git+https://github.com/APIs-guru/graphql-voyager.git"
   },
   "funding": "https://github.com/APIs-guru/graphql-voyager?sponsor=1",
   "bugs": {
@@ -49,8 +49,8 @@
     "prettier": "prettier --write --list-different . **/*.svg",
     "prettier:check": "prettier --check . **/*.svg",
     "check:spell": "cspell --cache --no-progress '**/*'",
-    "testonly": "npm run build:demo && npm pack && docker compose up --abort-on-container-exit --build test",
-    "update-snapshots": "npm run build:demo && npm pack && docker compose up --build update-snapshots",
+    "testonly": "npm run build:demo && npm pack && playwright test",
+    "update-snapshots": "npm run build:demo && npm pack && playwright test --update-snapshots",
     "deploy": "wrangler deploy"
   },
   "peerDependencies": {
@@ -68,7 +68,6 @@
     "svg-pan-zoom": "3.6.2"
   },
   "devDependencies": {
-    "@playwright/test": "1.53.0",
     "@svgr/webpack": "8.1.0",
     "@types/commonmark": "0.27.9",
     "@types/node": "24.0.1",
@@ -86,6 +85,7 @@
     "eslint-plugin-simple-import-sort": "12.1.1",
     "graphql": "16.11.0",
     "mini-css-extract-plugin": "2.9.2",
+    "playwright": "1.53.0",
     "postcss-cssnext": "3.1.1",
     "postcss-import": "16.1.0",
     "postcss-loader": "8.1.1",

@@ -1,5 +1,5 @@
-import type { PlaywrightTestConfig } from '@playwright/test';
-import { devices } from '@playwright/test';
+import playwrightPackage from 'playwright/package.json' with { type: 'json' };
+import { devices, type PlaywrightTestConfig } from 'playwright/test';
 
 const isCI = !!process.env['CI'];
 /**
@@ -7,6 +7,9 @@ const isCI = !!process.env['CI'];
  */
 const config: PlaywrightTestConfig = {
   testDir: './tests',
+  // FIXME: remove '-linux'
+  snapshotPathTemplate:
+    '{snapshotDir}/{testFileDir}/{testFileName}-snapshots/{arg}{-projectName}-linux{ext}',
   /* Maximum time one test can run for. */
   timeout: 20 * 1000,
   expect: {
@@ -38,12 +41,17 @@ const config: PlaywrightTestConfig = {
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'retain-on-failure',
+
+    connectOptions: {
+      wsEndpoint: 'ws://127.0.0.1:3000/',
+      exposeNetwork: '<loopback>',
+    },
   },
   projects: [
     {
       name: 'Demo',
       testMatch: 'Demo.spec.ts',
-      use: { baseURL: 'http://localhost:9090' },
+      use: { baseURL: 'http://127.0.0.1:9090' },
     },
     {
       name: 'WebpackExample',
@@ -57,10 +65,26 @@ const config: PlaywrightTestConfig = {
     },
   ],
   outputDir: 'test-results/',
-  webServer: {
-    command: 'npm run serve',
-    url: 'http://localhost:9090/',
-  },
+  webServer: [
+    {
+      name: 'playwright-server',
+      env: { PLAYWRIGHT_VERSION: playwrightPackage.version },
+      command:
+        'docker compose up --abort-on-container-exit --build playwright-server',
+      url: 'http://127.0.0.1:3000/',
+      stdout: 'pipe',
+      timeout: 120 * 1000,
+      gracefulShutdown: {
+        signal: 'SIGINT',
+        timeout: 120 * 1000,
+      },
+    },
+    {
+      name: 'npm run serve',
+      command: 'npm run serve',
+      url: 'http://localhost:9090/',
+    },
+  ],
 };
 
 export default config;
