@@ -1,7 +1,22 @@
+import dotenv from 'dotenv';
 import playwrightPackage from 'playwright/package.json' with { type: 'json' };
 import { devices, type PlaywrightTestConfig } from 'playwright/test';
 
+// Load environment variables from .env file
+dotenv.config();
+
+/**
+ * TEST_ENV environment variable controls test execution mode:
+ * - 'docker' (default): Runs tests in isolated Docker environment
+ * - 'local': Runs tests locally without Docker for easier debugging
+ * 
+ * Configure in .env file or set via command line:
+ *   TEST_ENV=local npm run testonly
+ */
 const isCI = !!process.env['CI'];
+const testEnv = process.env['TEST_ENV'] || 'docker';
+const isLocalTesting = testEnv === 'local';
+console.log(`Running tests in ${isLocalTesting ? 'local' : 'docker'} mode`);
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
@@ -42,49 +57,69 @@ const config: PlaywrightTestConfig = {
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'retain-on-failure',
 
-    connectOptions: {
-      wsEndpoint: 'ws://127.0.0.1:3000/',
-      exposeNetwork: '<loopback>',
-    },
+    ...(isLocalTesting
+      ? {}
+      : {
+          connectOptions: {
+            wsEndpoint: 'ws://127.0.0.1:3000/',
+            exposeNetwork: '<loopback>',
+          },
+        }),
   },
-  projects: [
-    {
-      name: 'Demo',
-      testMatch: 'Demo.spec.ts',
-      use: { baseURL: 'http://127.0.0.1:9090' },
-    },
-    {
-      name: 'WebpackExample',
-      testMatch: 'webpack.spec.ts',
-      use: { baseURL: 'http://serve-webpack-example:9090' },
-    },
-    {
-      name: 'ExpressExample',
-      testMatch: 'express.spec.ts',
-      use: { baseURL: 'http://serve-express-example:9090' },
-    },
-  ],
+  projects: isLocalTesting
+    ? [
+        {
+          name: 'Demo',
+          testMatch: 'demo.spec.ts',
+          use: { baseURL: 'http://localhost:9090' },
+        },
+      ]
+    : [
+        {
+          name: 'Demo',
+          testMatch: 'demo.spec.ts',
+          use: { baseURL: 'http://127.0.0.1:9090' },
+        },
+        {
+          name: 'WebpackExample',
+          testMatch: 'webpack.spec.ts',
+          use: { baseURL: 'http://serve-webpack-example:9090' },
+        },
+        {
+          name: 'ExpressExample',
+          testMatch: 'express.spec.ts',
+          use: { baseURL: 'http://serve-express-example:9090' },
+        },
+      ],
   outputDir: 'test-results/',
-  webServer: [
-    {
-      name: 'playwright-server',
-      env: { PLAYWRIGHT_VERSION: playwrightPackage.version },
-      command:
-        'docker compose up --abort-on-container-exit --build playwright-server',
-      url: 'http://127.0.0.1:3000/',
-      stdout: 'pipe',
-      timeout: 120 * 1000,
-      gracefulShutdown: {
-        signal: 'SIGINT',
-        timeout: 120 * 1000,
-      },
-    },
-    {
-      name: 'npm run serve',
-      command: 'npm run serve',
-      url: 'http://localhost:9090/',
-    },
-  ],
+  webServer: isLocalTesting
+    ? [
+        {
+          name: 'npm run serve',
+          command: 'npm run serve',
+          url: 'http://localhost:9090/',
+        },
+      ]
+    : [
+        {
+          name: 'playwright-server',
+          env: { PLAYWRIGHT_VERSION: playwrightPackage.version },
+          command:
+            'docker compose up --abort-on-container-exit --build playwright-server',
+          url: 'http://127.0.0.1:3000/',
+          stdout: 'pipe',
+          timeout: 120 * 1000,
+          gracefulShutdown: {
+            signal: 'SIGINT',
+            timeout: 120 * 1000,
+          },
+        },
+        {
+          name: 'npm run serve',
+          command: 'npm run serve',
+          url: 'http://localhost:9090/',
+        },
+      ],
 };
 
 export default config;
