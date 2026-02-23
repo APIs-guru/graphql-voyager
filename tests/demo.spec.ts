@@ -41,15 +41,11 @@ for (const name of SchemaPresets) {
     await voyagerPage.compareWithSnapshot('open-dialog.png');
 
     await presetsTab.tab.click();
-    await voyagerPage.compareWithSnapshot(
-      'switch-to-presets-tab.png',
-    );
+    await voyagerPage.compareWithSnapshot('switch-to-presets-tab.png');
 
     const slug = name.toLowerCase().replaceAll(' ', '-');
     await presetsTab.presetButtons[name].click();
-    await voyagerPage.compareWithSnapshot(
-      `choose-${slug}-preset.png`,
-    );
+    await voyagerPage.compareWithSnapshot(`choose-${slug}-preset.png`);
 
     await changeSchemaDialog.displayButton.click();
 
@@ -148,15 +144,11 @@ test('use custom introspection', async ({ page }) => {
   await voyagerPage.compareWithSnapshot('open-dialog.png');
 
   await introspectionTab.tab.click();
-  await voyagerPage.compareWithSnapshot(
-    'switch-to-introspection-tab.png',
-  );
+  await voyagerPage.compareWithSnapshot('switch-to-introspection-tab.png');
 
   await introspectionTab.copyIntrospectionQueryButton.click();
   await page.getByText('Copied!').waitFor({ state: 'visible', timeout: 0 });
-  await voyagerPage.compareWithSnapshot(
-    'copy-introspection-button-click.png',
-  );
+  await voyagerPage.compareWithSnapshot('copy-introspection-button-click.png');
 
   const clipboardText = await page.evaluate<string>(
     'navigator.clipboard.readText()',
@@ -193,7 +185,5 @@ test('use search params to pass url', async ({ page }) => {
   expect
     .soft(await voyagerPage.getGraphSVG())
     .toMatchSnapshot('schema-from-url-graph.svg');
-  await voyagerPage.compareWithSnapshot(
-    'display-schema-from-url.png',
-  );
+  await voyagerPage.compareWithSnapshot('display-schema-from-url.png');
 });

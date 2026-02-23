@@ -1,6 +1,6 @@
-import { expect, type Page, type Locator } from "playwright/test";
-import { format } from "prettier";
-import { PlaywrightChangeSchemaDialog } from "./schema/index.ts";
+import { expect, type Page, type Locator } from 'playwright/test';
+import { format } from 'prettier';
+import { PlaywrightChangeSchemaDialog } from './schema/index.ts';
 
 export class PlaywrightVoyagerPage {
   readonly page: Page;
@@ -51,7 +51,11 @@ export class PlaywrightVoyagerPage {
   async compareWithSnapshot(name: string, options?: any) {
     if (this.snapshotSaveDir) {
       const screenshotPath = `${this.snapshotSaveDir}/${name}`;
-      await this.page.screenshot({ ...options, path: screenshotPath, type: 'png' });
+      await this.page.screenshot({
+        ...options,
+        path: screenshotPath,
+        type: 'png',
+      });
       console.log(`Saved screenshot to ${screenshotPath}`);
     }
 
