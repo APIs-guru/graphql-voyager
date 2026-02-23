@@ -59,10 +59,10 @@ export class PlaywrightVoyagerPage {
       console.log(`Saved screenshot to ${screenshotPath}`);
     }
 
-    // Ignore local testing in local mode. It makes no sense in crossOS comparison of screenshots during testing
+    // Ignore snapshot comparison in local mode. It makes no sense in cross-OS comparison of screenshots during testing
     if (this.ignoreSnapshots) {
       console.log(`Ignoring snapshot for ${name}`);
-      return new Promise<void>((resolve) => resolve());
+      return;
     }
 
     return expect(this.page).toHaveScreenshot(name, options);
