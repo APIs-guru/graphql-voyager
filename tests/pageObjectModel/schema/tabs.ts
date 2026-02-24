@@ -1,4 +1,4 @@
-import { type Locator } from 'playwright';
+import { type Locator } from 'playwright/test';
 import { SchemaPresets } from './presets.ts';
 
 class PlaywrightChangeSchemaBaseTab {
