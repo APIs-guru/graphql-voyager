@@ -1,6 +1,6 @@
 import { expect, test } from 'playwright/test';
 
-import { gotoVoyagerPage } from './PageObjectModel.ts';
+import { gotoVoyagerPage } from './pageObjectModel/index.ts';
 
 test.fixme('open express example', async ({ page }) => {
   const voyagerPage = await gotoVoyagerPage(page, { path: '/voyager' });

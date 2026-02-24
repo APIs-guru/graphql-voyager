@@ -1,7 +1,7 @@
 import { buildSchema, graphqlSync } from 'graphql';
 import { expect, test } from 'playwright/test';
 
-import { gotoVoyagerPage, SchemaPresets } from './PageObjectModel.ts';
+import { gotoVoyagerPage, SchemaPresets } from './pageObjectModel/index.ts';
 
 test('open demo', async ({ page }) => {
   const voyagerPage = await gotoVoyagerPage(page);
@@ -10,7 +10,7 @@ test('open demo', async ({ page }) => {
   expect
     .soft(await voyagerPage.getGraphSVG())
     .toMatchSnapshot('demo-graph.svg');
-  await expect(voyagerPage.page).toHaveScreenshot('loaded-demo.png');
+  await voyagerPage.compareWithSnapshot('loaded-demo.png');
 });
 
 test('resize screen', async ({ page }) => {
@@ -22,13 +22,13 @@ test('resize screen', async ({ page }) => {
   expect
     .soft(await voyagerPage.getGraphSVG())
     .toMatchSnapshot('graph-before-resize.svg');
-  await expect(voyagerPage.page).toHaveScreenshot('demo-before-resize.png');
+  await voyagerPage.compareWithSnapshot('demo-before-resize.png');
 
   await page.setViewportSize({ width: 1024, height: 768 });
   expect
     .soft(await voyagerPage.getGraphSVG())
     .toMatchSnapshot('graph-after-resize.svg');
-  await expect(voyagerPage.page).toHaveScreenshot('demo-after-resize.png');
+  await voyagerPage.compareWithSnapshot('demo-after-resize.png');
 });
 
 for (const name of SchemaPresets) {
@@ -38,18 +38,14 @@ for (const name of SchemaPresets) {
     const { presetsTab } = changeSchemaDialog;
 
     await changeSchemaDialog.openButton.click();
-    await expect(voyagerPage.page).toHaveScreenshot('open-dialog.png');
+    await voyagerPage.compareWithSnapshot('open-dialog.png');
 
     await presetsTab.tab.click();
-    await expect(voyagerPage.page).toHaveScreenshot(
-      'switch-to-presets-tab.png',
-    );
+    await voyagerPage.compareWithSnapshot('switch-to-presets-tab.png');
 
     const slug = name.toLowerCase().replaceAll(' ', '-');
     await presetsTab.presetButtons[name].click();
-    await expect(voyagerPage.page).toHaveScreenshot(
-      `choose-${slug}-preset.png`,
-    );
+    await voyagerPage.compareWithSnapshot(`choose-${slug}-preset.png`);
 
     await changeSchemaDialog.displayButton.click();
 
@@ -59,7 +55,7 @@ for (const name of SchemaPresets) {
     expect
       .soft(await voyagerPage.getGraphSVG())
       .toMatchSnapshot(`${slug}-graph.svg`);
-    await expect(voyagerPage.page).toHaveScreenshot(`show-${slug}-preset.png`);
+    await voyagerPage.compareWithSnapshot(`show-${slug}-preset.png`);
   });
 }
 
@@ -73,12 +69,12 @@ test('check loading animation', async ({ page }) => {
   await presetsTab.presetButtons['GitHub'].click();
   await changeSchemaDialog.displayButton.click();
 
-  await expect(voyagerPage.page).toHaveScreenshot('loading-animation.png', {
+  await voyagerPage.compareWithSnapshot('loading-animation.png', {
     animations: 'disabled',
   });
 
   await voyagerPage.waitForGraphToBeLoaded();
-  await expect(voyagerPage.page).toHaveScreenshot('show-github-preset.png');
+  await voyagerPage.compareWithSnapshot('show-github-preset.png');
 });
 
 test('use custom SDL', async ({ page }) => {
@@ -88,20 +84,20 @@ test('use custom SDL', async ({ page }) => {
   await voyagerPage.waitForGraphToBeLoaded();
 
   await changeSchemaDialog.openButton.click();
-  await expect(voyagerPage.page).toHaveScreenshot('open-dialog.png');
+  await voyagerPage.compareWithSnapshot('open-dialog.png');
 
   await sdlTab.tab.click();
-  await expect(voyagerPage.page).toHaveScreenshot('switch-to-sdl-tab.png');
+  await voyagerPage.compareWithSnapshot('switch-to-sdl-tab.png');
 
   await sdlTab.sdlTextArea.fill('type Query { foo: String }');
-  await expect(voyagerPage.page).toHaveScreenshot('fill-sdl.png');
+  await voyagerPage.compareWithSnapshot('fill-sdl.png');
 
   await changeSchemaDialog.displayButton.click();
   await voyagerPage.waitForGraphToBeLoaded();
   expect
     .soft(await voyagerPage.getGraphSVG())
     .toMatchSnapshot('custom-sdl-graph.svg');
-  await expect(voyagerPage.page).toHaveScreenshot('display-sdl.png');
+  await voyagerPage.compareWithSnapshot('display-sdl.png');
 });
 
 test('use custom SDL with custom directives', async ({ page }) => {
@@ -111,7 +107,7 @@ test('use custom SDL with custom directives', async ({ page }) => {
   expect
     .soft(await voyagerPage.getGraphSVG())
     .toMatchSnapshot('custom-sdl-with-unknown-directives-graph.svg');
-  await expect(voyagerPage.page).toHaveScreenshot(
+  await voyagerPage.compareWithSnapshot(
     'display-sdl-with-unknown-directives.png',
   );
 });
@@ -130,7 +126,7 @@ test('use custom SDL with deprecated fields', async ({ page }) => {
   expect
     .soft(await voyagerPage.getGraphSVG())
     .toMatchSnapshot('custom-sdl-with-deprecated-graph.svg');
-  await expect(voyagerPage.page).toHaveScreenshot(
+  await voyagerPage.compareWithSnapshot(
     'display-sdl-with-deprecated.png',
   );
 });
@@ -145,17 +141,14 @@ test('use custom introspection', async ({ page }) => {
   await voyagerPage.waitForGraphToBeLoaded();
 
   await changeSchemaDialog.openButton.click();
-  await expect(voyagerPage.page).toHaveScreenshot('open-dialog.png');
+  await voyagerPage.compareWithSnapshot('open-dialog.png');
 
   await introspectionTab.tab.click();
-  await expect(voyagerPage.page).toHaveScreenshot(
-    'switch-to-introspection-tab.png',
-  );
+  await voyagerPage.compareWithSnapshot('switch-to-introspection-tab.png');
 
   await introspectionTab.copyIntrospectionQueryButton.click();
-  await expect(voyagerPage.page).toHaveScreenshot(
-    'copy-introspection-button-click.png',
-  );
+  await page.getByText('Copied!').waitFor({ state: 'visible', timeout: 0 });
+  await voyagerPage.compareWithSnapshot('copy-introspection-button-click.png');
 
   const clipboardText = await page.evaluate<string>(
     'navigator.clipboard.readText()',
@@ -165,14 +158,15 @@ test('use custom introspection', async ({ page }) => {
   const jsonResult = JSON.stringify(result, null, 2);
 
   await introspectionTab.introspectionTextArea.fill(jsonResult);
-  await expect(voyagerPage.page).toHaveScreenshot('fill-introspection.png');
+  await page.getByText('Copied!').waitFor({ state: 'hidden', timeout: 2000 });
+  await voyagerPage.compareWithSnapshot('fill-introspection.png');
 
   await changeSchemaDialog.displayButton.click();
   await voyagerPage.waitForGraphToBeLoaded();
   expect
     .soft(await voyagerPage.getGraphSVG())
     .toMatchSnapshot('custom-introspection-graph.svg');
-  await expect(voyagerPage.page).toHaveScreenshot('display-introspection.png');
+  await voyagerPage.compareWithSnapshot('display-introspection.png');
 });
 
 test('use search params to pass url', async ({ page }) => {
@@ -191,7 +185,5 @@ test('use search params to pass url', async ({ page }) => {
   expect
     .soft(await voyagerPage.getGraphSVG())
     .toMatchSnapshot('schema-from-url-graph.svg');
-  await expect(voyagerPage.page).toHaveScreenshot(
-    'display-schema-from-url.png',
-  );
+  await voyagerPage.compareWithSnapshot('display-schema-from-url.png');
 });
