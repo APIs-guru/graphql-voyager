@@ -78,8 +78,8 @@ Middleware supports the following properties:
 ### Express
 
 ```js
-import express from 'express';
-import { express as voyagerMiddleware } from 'graphql-voyager/middleware';
+const express = require('express');
+const { express: voyagerMiddleware } = require('graphql-voyager/middleware');
 
 const app = express();
 
